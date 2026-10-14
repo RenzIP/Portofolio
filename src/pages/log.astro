@@ -8,7 +8,7 @@ import { commits } from "../data/site";
 ---
 
 <RepoLayout title="log" file="log.md">
-  <header class="mb-8">
+  <header class="reveal mb-8">
     <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
       <span class="text-accent-500" aria-hidden="true">##</span>
       log.md
@@ -19,7 +19,7 @@ import { commits } from "../data/site";
     </p>
   </header>
 
-  <div class="code-block p-5">
+  <div class="reveal code-block p-5">
     <p class="meta-label mb-4">$ git log --graph --oneline</p>
     <CommitGraph commits={commits} />
   </div>

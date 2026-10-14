@@ -15,7 +15,21 @@ Dibangun dengan **Astro** + **Tailwind CSS v4**, output HTML statis.
 | Tipografi | `@tailwindcss/typography` |
 | Font | JetBrains Mono + Space Grotesk (self-hosted via `@fontsource-variable`) |
 | Konten proyek | Astro Content Collections (Markdown) |
+| Navigasi | View Transitions (`ClientRouter`) + Command Palette (Ctrl/⌘+K) |
+| SEO | `@astrojs/sitemap` + `robots.txt` |
 | Bahasa | TypeScript (strict) |
+
+## Fitur
+
+- **Command palette** — tekan `Ctrl+K` (atau `⌘+K`) untuk mencari halaman/proyek.
+  Navigasi keyboard penuh: `↑` `↓` pilih, `↵` buka, `Esc` tutup.
+- **View transitions** — perpindahan halaman tanpa reload (SPA-like), tetap statis.
+- **Animasi masuk** — konten muncul halus dengan stagger; otomatis dimatikan
+  bila pengguna mengaktifkan `prefers-reduced-motion`.
+- **Salin email sekali klik** di halaman kontak.
+- **Dark/light** — mengikuti preferensi sistem.
+- **Sitemap & robots.txt** — otomatis saat build.
+- **Favicon** commit-graph kustom (SVG, ringan).
 
 ## Menjalankan
 
@@ -53,29 +67,30 @@ Prinsip visual:
 ```
 src/
 ├── components/
-│   ├── TopBar.astro        # breadcrumb path + badge branch
-│   ├── FileTree.astro      # sidebar navigasi (desktop)
-│   ├── MobileNav.astro     # navigasi horizontal (mobile)
-│   ├── StatusBar.astro     # footer bergaya status bar
-│   ├── CommitGraph.astro   # timeline gaya `git log --graph`
-│   └── ProjectCard.astro   # kartu entri proyek
+│   ├── TopBar.astro         # breadcrumb path + tombol cari + badge branch
+│   ├── FileTree.astro       # sidebar navigasi (desktop)
+│   ├── MobileNav.astro      # navigasi horizontal (mobile)
+│   ├── CommandPalette.astro # palet perintah Ctrl/⌘+K
+│   ├── StatusBar.astro      # footer bergaya status bar
+│   ├── CommitGraph.astro    # timeline gaya `git log --graph`
+│   └── ProjectCard.astro    # kartu entri proyek
 ├── content/
-│   └── projects/           # data proyek (1 file .md per proyek)
+│   └── projects/            # data proyek (1 file .md per proyek)
 ├── data/
-│   └── site.ts             # identitas, file tree, commits, branches — EDIT DI SINI
+│   └── site.ts              # identitas, file tree, commits, branches — EDIT DI SINI
 ├── layouts/
-│   └── RepoLayout.astro    # kerangka utama
+│   └── RepoLayout.astro     # kerangka utama
 ├── pages/
-│   ├── index.astro         # README.md
-│   ├── log.astro           # log.md
-│   ├── branches.astro      # branches.md
-│   ├── contact.astro       # CONTACT.md
+│   ├── index.astro          # README.md
+│   ├── log.astro            # log.md
+│   ├── branches.astro       # branches.md
+│   ├── contact.astro        # CONTACT.md
 │   ├── 404.astro
 │   └── projects/
 │       ├── index.astro
 │       └── [id].astro
 ├── styles/
-│   └── global.css          # tema + token warna
+│   └── global.css           # tema + token warna + animasi
 └── content.config.ts
 ```
 

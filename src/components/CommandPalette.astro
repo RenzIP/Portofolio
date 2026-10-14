@@ -1,0 +1,233 @@
+---
+/**
+ * CommandPalette — palet perintah (Ctrl+K / Cmd+K) untuk navigasi cepat.
+ * Vanilla JS, tanpa framework. Ringan dan bisa diakses keyboard.
+ */
+import { fileTree, socials } from "../data/site";
+
+const fileCommands = fileTree.flatMap((group) =>
+  group.files.map((f) => ({
+    label: f.label,
+    hint: f.hint,
+    href: f.path,
+    kind: "file" as const,
+    external: false,
+  })),
+);
+
+const externalCommands = socials.map((s) => ({
+  label: s.label,
+  hint: s.handle,
+  href: s.href,
+  kind: "link" as const,
+  external: true,
+}));
+
+const commands = [...fileCommands, ...externalCommands];
+---
+
+<div
+  id="cmdk"
+  class="fixed inset-0 z-50 hidden items-start justify-center pt-[12vh]"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Palet perintah"
+>
+  <!-- backdrop -->
+  <div
+    id="cmdk-backdrop"
+    class="absolute inset-0 bg-ink/20 backdrop-blur-[2px]"
+  ></div>
+
+  <!-- panel -->
+  <div
+    class="relative mx-4 w-full max-w-lg overflow-hidden rounded-md border border-rule-strong bg-paper shadow-lift"
+  >
+    <div class="flex items-center gap-2 border-b border-rule px-3">
+      <span class="text-xs text-ink-faint" aria-hidden="true">⌘</span>
+      <input
+        id="cmdk-input"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Ketik untuk mencari…"
+        class="w-full bg-transparent py-3 text-sm text-ink outline-none placeholder:text-ink-faint"
+        aria-controls="cmdk-list"
+        aria-autocomplete="list"
+        role="combobox"
+        aria-expanded="true"
+      />
+      <kbd
+        class="shrink-0 rounded-xs border border-rule px-1.5 py-0.5 text-[0.65rem] text-ink-faint"
+      >
+        esc
+      </kbd>
+    </div>
+
+    <ul
+      id="cmdk-list"
+      class="thin-scroll max-h-72 overflow-y-auto py-1"
+      role="listbox"
+      aria-label="Hasil pencarian"
+    >
+      {
+        commands.map((cmd, i) => (
+          <li role="option" aria-selected={i === 0 ? "true" : "false"}>
+            <a
+              href={cmd.href}
+              target={cmd.external ? "_blank" : undefined}
+              rel={cmd.external ? "noopener noreferrer" : undefined}
+              data-cmdk-item
+              data-index={i}
+              data-label={cmd.label.toLowerCase()}
+              class="flex items-center gap-3 px-3 py-2 text-sm text-ink-soft data-[active=true]:bg-accent-50 data-[active=true]:text-accent-800"
+            >
+              <span class="shrink-0 text-xs text-ink-faint" aria-hidden="true">
+                {cmd.kind === "file" ? "·" : "↗"}
+              </span>
+              <span class="font-medium">{cmd.label}</span>
+              <span class="ml-auto truncate text-xs text-ink-faint">
+                {cmd.hint}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+      <li
+        id="cmdk-empty"
+        class="hidden px-3 py-6 text-center text-sm text-ink-faint"
+      >
+        Tidak ada hasil.
+      </li>
+    </ul>
+
+    <div
+      class="flex items-center gap-4 border-t border-rule px-3 py-2 text-[0.65rem] text-ink-faint"
+    >
+      <span class="flex items-center gap-1">
+        <kbd class="rounded-xs border border-rule px-1 py-px">↑</kbd>
+        <kbd class="rounded-xs border border-rule px-1 py-px">↓</kbd>
+        pilih
+      </span>
+      <span class="flex items-center gap-1">
+        <kbd class="rounded-xs border border-rule px-1 py-px">↵</kbd>
+        buka
+      </span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Dipanggil ulang setiap navigasi (view transitions) & saat load pertama.
+  const initCmdk = () => {
+    const cmdk = document.getElementById("cmdk") as HTMLDivElement | null;
+    const input = document.getElementById(
+      "cmdk-input",
+    ) as HTMLInputElement | null;
+    const list = document.getElementById("cmdk-list") as HTMLUListElement | null;
+    const empty = document.getElementById(
+      "cmdk-empty",
+    ) as HTMLLIElement | null;
+    const backdrop = document.getElementById(
+      "cmdk-backdrop",
+    ) as HTMLDivElement | null;
+
+    if (!cmdk || !input || !list) return;
+
+    const allItems = Array.from(
+      list.querySelectorAll<HTMLAnchorElement>("[data-cmdk-item]"),
+    );
+    let visible: HTMLAnchorElement[] = [...allItems];
+    let activeIndex = 0;
+
+    const setActive = (i: number) => {
+      if (visible.length === 0) return;
+      activeIndex = (i + visible.length) % visible.length;
+      visible.forEach((el, idx) => {
+        const isActive = idx === activeIndex;
+        el.dataset.active = String(isActive);
+        el.parentElement?.setAttribute("aria-selected", String(isActive));
+        if (isActive) el.scrollIntoView({ block: "nearest" });
+      });
+    };
+
+    const filter = () => {
+      const q = input.value.trim().toLowerCase();
+      visible = [];
+      allItems.forEach((el) => {
+        const match = q === "" || (el.dataset.label ?? "").includes(q);
+        el.parentElement!.classList.toggle("hidden", !match);
+        if (match) visible.push(el);
+      });
+      if (empty) empty.classList.toggle("hidden", visible.length !== 0);
+      activeIndex = 0;
+      setActive(0);
+    };
+
+    const open = () => {
+      cmdk.classList.remove("hidden");
+      cmdk.classList.add("flex");
+      document.body.style.overflow = "hidden";
+      input.value = "";
+      filter();
+      input.focus();
+    };
+
+    const close = () => {
+      cmdk.classList.add("hidden");
+      cmdk.classList.remove("flex");
+      document.body.style.overflow = "";
+    };
+
+    // Simpan referensi agar handler global bisa memakai elemen terbaru.
+    (window as any).__cmdk = {
+      open,
+      close,
+      isOpen: () => !cmdk.classList.contains("hidden"),
+    };
+
+    input.addEventListener("input", filter);
+
+    // Navigasi keyboard di dalam daftar (panah + enter).
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActive(activeIndex + 1);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActive(activeIndex - 1);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        visible[activeIndex]?.click();
+      }
+    });
+
+    backdrop?.addEventListener("click", close);
+
+    document.getElementById("cmdk-trigger")?.addEventListener("click", open);
+  };
+
+  // Handler global: dipasang SEKALI saja (modul dievaluasi sekali).
+  if (!(window as any).__cmdkBound) {
+    (window as any).__cmdkBound = true;
+    window.addEventListener("keydown", (e) => {
+      const api = (window as any).__cmdk;
+      if (!api) return;
+      const isOpen = api.isOpen();
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        isOpen ? api.close() : api.open();
+        return;
+      }
+      if (!isOpen) return;
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        api.close();
+      }
+    });
+  }
+
+  document.addEventListener("astro:page-load", initCmdk);
+</script>

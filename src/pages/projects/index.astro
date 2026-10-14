@@ -12,7 +12,7 @@ const projects = (await getCollection("projects")).sort(
 ---
 
 <RepoLayout title="projects" file="projects/">
-  <header class="mb-8">
+  <header class="reveal mb-8">
     <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
       <span class="text-violet-500" aria-hidden="true">▸</span>
       projects/
@@ -28,7 +28,7 @@ const projects = (await getCollection("projects")).sort(
         Direktori kosong. Belum ada proyek.
       </p>
     ) : (
-      <div class="grid gap-4 sm:grid-cols-2">
+      <div class="reveal-stagger grid gap-4 sm:grid-cols-2">
         {projects.map((project) => (
           <ProjectCard project={project} />
         ))}

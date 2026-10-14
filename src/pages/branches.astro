@@ -14,7 +14,7 @@ const toneMap: Record<string, { dot: string; text: string; border: string }> = {
 ---
 
 <RepoLayout title="branches" file="branches.md">
-  <header class="mb-8">
+  <header class="reveal mb-8">
     <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
       <span class="text-accent-500" aria-hidden="true">##</span>
       branches.md
@@ -25,9 +25,9 @@ const toneMap: Record<string, { dot: string; text: string; border: string }> = {
     </p>
   </header>
 
-  <p class="meta-label mb-4">$ git branch --list</p>
+  <p class="meta-label reveal mb-4">$ git branch --list</p>
 
-  <ul class="space-y-4">
+  <ul class="reveal-stagger space-y-4">
     {
       branches.map((branch) => {
         const tone = toneMap[branch.tone] ?? toneMap.ink;

@@ -11,7 +11,7 @@ import { repo, socials } from "../data/site";
   file="CONTACT.md"
   description="Cara menghubungi saya untuk kolaborasi atau peluang kerja."
 >
-  <header class="mb-8">
+  <header class="reveal mb-8">
     <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
       <span class="text-accent-500" aria-hidden="true">##</span>
       CONTACT.md
@@ -22,33 +22,53 @@ import { repo, socials } from "../data/site";
     </p>
   </header>
 
-  <section class="mb-10">
-    <p class="meta-label mb-3">$ git remote -v</p>
-    <ul class="space-y-2">
-      {
-        socials.map((social) => (
-          <li>
-            <a
-              href={social.href}
-              target={social.href.startsWith("mailto:") ? undefined : "_blank"}
-              rel="noopener noreferrer"
-              class="group flex items-center gap-3 rounded-md border border-rule bg-paper px-4 py-3 transition-colors hover:border-accent-400"
-            >
-              <span class="text-xs text-ink-faint">{social.label.toLowerCase()}</span>
-              <span class="ml-auto truncate text-sm text-ink-soft transition-colors group-hover:text-accent-700">
-                {social.handle}
-              </span>
-              <span class="shrink-0 text-ink-faint transition-colors group-hover:text-accent-600" aria-hidden="true">
-                ↗
-              </span>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+  <!-- CTA email dengan tombol salin -->
+  <section class="reveal code-block mb-10 p-5">
+    <p class="meta-label mb-3">$ echo $EMAIL | pbcopy</p>
+    <div class="flex flex-wrap items-center gap-3">
+      <a
+        href={`mailto:${repo.email}`}
+        class="font-display text-lg font-semibold text-ink transition-colors hover:text-accent-700"
+      >
+        {repo.email}
+      </a>
+      <button
+        id="copy-email"
+        type="button"
+        data-email={repo.email}
+        class="rounded-sm border border-rule-strong px-2.5 py-1 text-xs text-ink-soft transition-colors hover:border-accent-400 hover:text-accent-700"
+      >
+        <span id="copy-email-label">salin</span>
+      </button>
+    </div>
   </section>
 
-  <section class="code-block p-5">
+  <section class="reveal-stagger mb-10 space-y-2">
+    <p class="meta-label mb-1">$ git remote -v</p>
+    {
+      socials.map((social) => (
+        <a
+          href={social.href}
+          target={social.href.startsWith("mailto:") ? undefined : "_blank"}
+          rel="noopener noreferrer"
+          class="group flex items-center gap-3 rounded-md border border-rule bg-paper px-4 py-3 transition-colors hover:border-accent-400"
+        >
+          <span class="text-xs text-ink-faint">{social.label.toLowerCase()}</span>
+          <span class="ml-auto truncate text-sm text-ink-soft transition-colors group-hover:text-accent-700">
+            {social.handle}
+          </span>
+          <span
+            class="shrink-0 text-ink-faint transition-colors group-hover:text-accent-600"
+            aria-hidden="true"
+          >
+            ↗
+          </span>
+        </a>
+      ))
+    }
+  </section>
+
+  <section class="reveal code-block p-5">
     <p class="meta-label mb-3">// preferensi kerja</p>
     <dl class="space-y-2 text-sm">
       <div class="flex gap-4">
@@ -69,3 +89,26 @@ import { repo, socials } from "../data/site";
     </dl>
   </section>
 </RepoLayout>
+
+<script>
+  const initCopyEmail = () => {
+    const btn = document.getElementById("copy-email");
+    const label = document.getElementById("copy-email-label");
+    if (!btn || !label || btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+
+    btn.addEventListener("click", async () => {
+      const email = btn.getAttribute("data-email");
+      if (!email) return;
+      try {
+        await navigator.clipboard.writeText(email);
+        label.textContent = "tersalin ✓";
+      } catch {
+        label.textContent = "gagal";
+      }
+      setTimeout(() => (label.textContent = "salin"), 1800);
+    });
+  };
+
+  document.addEventListener("astro:page-load", initCopyEmail);
+</script>
