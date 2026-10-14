@@ -1,0 +1,35 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+
+const projects = (await getCollection("projects")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<Layout
+  title="Projects"
+  description="Kumpulan proyek yang pernah saya kerjakan."
+>
+  <header class="mb-10">
+    <h1 class="mb-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
+      Projects
+    </h1>
+    <p class="text-slate-600 dark:text-slate-400">
+      {projects.length} proyek — dari aplikasi mobile sampai website.
+    </p>
+  </header>
+
+  {
+    projects.length === 0 ? (
+      <p class="text-slate-500">Belum ada proyek yang ditambahkan.</p>
+    ) : (
+      <div class="grid gap-5 sm:grid-cols-2">
+        {projects.map((project) => (
+          <ProjectCard project={project} />
+        ))}
+      </div>
+    )
+  }
+</Layout>

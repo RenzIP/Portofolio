@@ -1,0 +1,58 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { site } from "../data/site";
+---
+
+<Layout
+  title="Contact"
+  description="Cara menghubungi saya untuk kolaborasi atau peluang kerja."
+>
+  <header class="mb-12">
+    <h1 class="mb-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
+      Hubungi Saya
+    </h1>
+    <p class="max-w-2xl text-lg text-slate-600 dark:text-slate-400">
+      Punya proyek, pertanyaan, atau ingin berkolaborasi? Saya senang mendengarnya.
+    </p>
+  </header>
+
+  <div class="grid gap-10 lg:grid-cols-2">
+    <section>
+      <h2 class="mb-4 text-sm font-semibold tracking-wide text-slate-900 uppercase dark:text-slate-100">
+        Lewat Email
+      </h2>
+      <p class="mb-4 text-slate-600 dark:text-slate-400">
+        Cara paling cepat adalah mengirim email. Saya biasanya membalas dalam 1–2 hari kerja.
+      </p>
+      <a
+        href={`mailto:${site.email}`}
+        class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+      >
+        {site.email}
+      </a>
+    </section>
+
+    <section>
+      <h2 class="mb-4 text-sm font-semibold tracking-wide text-slate-900 uppercase dark:text-slate-100">
+        Media Sosial
+      </h2>
+      <ul class="space-y-3">
+        {
+          site.socials.map(({ label, href }) => (
+            <li>
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-800 dark:text-slate-300 dark:hover:border-brand-600 dark:hover:text-brand-400"
+              >
+                <span>{label}</span>
+                <span aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</Layout>
