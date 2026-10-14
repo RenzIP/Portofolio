@@ -33,6 +33,9 @@ Dibangun dengan **Astro** + **Tailwind CSS v4**, output HTML statis.
 - **404 dengan efek ketik** — perintah `git checkout` yang gagal, diketik real-time.
 - **Salin email sekali klik** di halaman kontak.
 - **Dark/light** — mengikuti preferensi sistem.
+- **OG image otomatis** — setiap halaman & proyek punya kartu preview 1200×630
+  yang digenerate saat build (`astro-og-canvas`), jadi link yang di-share ke
+  WhatsApp/LinkedIn/Telegram tampil bergambar.
 - **Sitemap & robots.txt** — otomatis saat build.
 - **Favicon** commit-graph kustom (SVG, ringan).
 
@@ -97,11 +100,14 @@ src/
 │   ├── branches.astro        # branches.md
 │   ├── contact.astro         # CONTACT.md
 │   ├── 404.astro             # 404 dengan efek ketik
+│   ├── open-graph/
+│   │   └── [...route].ts     # generator OG image
 │   └── projects/
 │       ├── index.astro
 │       └── [id].astro
 ├── styles/
 │   └── global.css            # tema + token warna + animasi
+├── og-fonts/                 # font TTF untuk generate OG image
 └── content.config.ts
 ```
 
