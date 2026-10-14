@@ -28,7 +28,7 @@ const projects = (await getCollection("projects")).sort(
         Direktori kosong. Belum ada proyek.
       </p>
     ) : (
-      <div class="reveal-stagger grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-4 sm:grid-cols-2" data-reveal>
         {projects.map((project) => (
           <ProjectCard project={project} />
         ))}

@@ -1,0 +1,52 @@
+---
+/**
+ * ScrollReveal — script kecil yang memberi animasi muncul
+ * pada elemen ber-class `[data-reveal]` saat masuk viewport.
+ *
+ * Pakai IntersectionObserver; kalau tidak didukung, elemen langsung tampil.
+ */
+---
+
+<script>
+  const initScrollReveal = () => {
+    const targets = document.querySelectorAll<HTMLElement>("[data-reveal]");
+    if (targets.length === 0) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !("IntersectionObserver" in window)) {
+      targets.forEach((el) => el.classList.add("sr-show"));
+      return;
+    }
+
+    targets.forEach((el, i) => {
+      // sudah pernah tampil? jangan animasi ulang
+      if (el.dataset.revealed === "1") {
+        el.classList.add("sr-show");
+        return;
+      }
+      el.classList.add("sr-hidden");
+      el.style.transitionDelay = `${Math.min(i, 5) * 60}ms`;
+    });
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            el.classList.remove("sr-hidden");
+            el.classList.add("sr-show");
+            el.dataset.revealed = "1";
+            io.unobserve(el);
+          }
+        });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+    );
+
+    targets.forEach((el) => {
+      if (el.dataset.revealed !== "1") io.observe(el);
+    });
+  };
+
+  document.addEventListener("astro:page-load", initScrollReveal);
+</script>

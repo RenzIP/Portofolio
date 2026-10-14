@@ -1,0 +1,36 @@
+---
+/**
+ * ScrollProgress — garis tipis di paling atas yang menunjukkan
+ * seberapa jauh halaman sudah di-scroll. Aksen amber.
+ */
+---
+
+<div
+  id="scroll-progress"
+  class="fixed top-0 left-0 z-50 h-0.5 w-0 bg-accent-500 transition-[width] duration-75 ease-out"
+  aria-hidden="true"
+></div>
+
+<script>
+  const el = document.getElementById("scroll-progress");
+  if (el) {
+    let raf = 0;
+    const update = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - doc.clientHeight;
+      const p = max > 0 ? (doc.scrollTop / max) * 100 : 0;
+      el.style.width = `${p}%`;
+      raf = 0;
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    // sekali pasang; aman karena elemen ini ada di setiap halaman
+    if (!(window as any).__spBound) {
+      (window as any).__spBound = true;
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll, { passive: true });
+    }
+    update();
+  }
+</script>

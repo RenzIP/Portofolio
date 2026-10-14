@@ -1,0 +1,149 @@
+---
+/**
+ * BootScreen — layar loading bergaya `git clone` yang tampil saat
+ * pengunjung PERTAMA KALI membuka situs (per sesi).
+ *
+ * Prinsip:
+ * - Tidak pernah menghalangi: kalau JS mati, layar ini tidak muncul.
+ * - Sangat singkat (~1.4 detik) supaya tidak mengganggu.
+ * - Dilewati total kalau pengguna memakai prefers-reduced-motion.
+ * - Hanya sekali per sesi (sessionStorage), tidak tiap navigasi.
+ */
+import { repo } from "../data/site";
+---
+
+<div
+  id="boot"
+  class="fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-paper px-6"
+  role="status"
+  aria-live="polite"
+  aria-label="Memuat situs"
+>
+  <div class="w-full max-w-md">
+    <!-- prompt -->
+    <p class="mb-4 text-xs text-ink-faint">
+      <span class="text-accent-600">$</span> git clone
+      <span class="text-ink-soft"
+        >git@github.com:{repo.owner}/{repo.name}.git</span
+      >
+    </p>
+
+    <!-- baris output -->
+    <div class="space-y-1.5 font-mono text-xs">
+      <p class="boot-line text-ink-soft" data-boot-line data-delay="0">
+        <span class="text-violet-500">Cloning into</span> '{repo.name}'...
+      </p>
+      <p class="boot-line text-ink-soft" data-boot-line data-delay="240">
+        remote: Enumerating objects: <span class="text-ink">147</span>, done.
+      </p>
+      <p class="boot-line text-ink-soft" data-boot-line data-delay="480">
+        remote: Counting objects: 100% (147/147), done.
+      </p>
+      <p class="boot-line text-ink-soft" data-boot-line data-delay="700">
+        Receiving objects: 100% (147/147), <span class="text-ink">2.4 MiB</span>,
+        done.
+      </p>
+      <p class="boot-line text-ink-soft" data-boot-line data-delay="920">
+        Resolving deltas: 100% (32/32), done.
+      </p>
+    </div>
+
+    <!-- progress bar -->
+    <div class="mt-5 h-1 w-full overflow-hidden rounded-full bg-paper-sunk">
+      <div
+        id="boot-bar"
+        class="boot-bar-fill h-full rounded-full bg-accent-500"
+      >
+      </div>
+    </div>
+
+    <p class="mt-2 flex items-center justify-between text-[0.65rem] text-ink-faint">
+      <span id="boot-status">connecting…</span>
+      <span id="boot-percent">0%</span>
+    </p>
+  </div>
+</div>
+
+<script>
+  const boot = document.getElementById("boot");
+  const bar = document.getElementById("boot-bar");
+  const percent = document.getElementById("boot-percent");
+  const status = document.getElementById("boot-status");
+
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  // Tampilkan hanya pada kunjungan pertama di sesi ini, dan bukan reduced-motion.
+  const seen = sessionStorage.getItem("boot-seen");
+  const isFirstVisit = !seen;
+
+  if (boot && bar && percent && !reduceMotion && isFirstVisit) {
+    sessionStorage.setItem("boot-seen", "1");
+
+    boot.classList.remove("hidden");
+    boot.classList.add("flex");
+    document.documentElement.style.overflow = "hidden";
+
+    // munculkan tiap baris sesuai delay
+    boot.querySelectorAll<HTMLElement>("[data-boot-line]").forEach((line) => {
+      const delay = Number(line.dataset.delay ?? 0);
+      line.style.animationDelay = `${delay}ms`;
+    });
+
+    // progress: naik bertahap lalu selesai
+    // Label sengaja Inggris, menyatu dengan output git di atasnya.
+    const steps: Array<[number, string]> = [
+      [18, "remote: compressing objects"],
+      [42, "Receiving objects"],
+      [68, "Resolving deltas"],
+      [88, "Checking out files"],
+      [100, "done."],
+    ];
+
+    let i = 0;
+    const tick = () => {
+      if (i >= steps.length) {
+        finish();
+        return;
+      }
+      const [p, label] = steps[i];
+      bar.style.width = `${p}%`;
+      percent.textContent = `${p}%`;
+      if (status) status.textContent = label;
+      i++;
+      setTimeout(tick, 230);
+    };
+
+    const finish = () => {
+      boot.style.transition = "opacity 0.35s ease";
+      boot.style.opacity = "0";
+      setTimeout(() => {
+        boot.remove();
+        document.documentElement.style.overflow = "";
+      }, 360);
+    };
+
+    // mulai setelah frame pertama, biar transisi mulus
+    requestAnimationFrame(() => setTimeout(tick, 120));
+
+    // pengaman: apa pun yang terjadi, jangan biarkan layar nyangkut.
+    setTimeout(() => {
+      if (document.getElementById("boot")) finish();
+    }, 2600);
+
+    // pengguna bisa melewati dengan klik / tombol apa pun
+    const skip = () => finish();
+    boot.addEventListener("click", skip);
+    window.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key === "Escape" || e.key === "Enter" || e.key === " ") skip();
+      },
+      { once: true },
+    );
+  } else if (boot) {
+    // sudah pernah dilihat: hapus elemen sama sekali
+    boot.remove();
+  }
+</script>

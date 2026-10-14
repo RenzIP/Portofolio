@@ -27,7 +27,7 @@ const toneMap: Record<string, { dot: string; text: string; border: string }> = {
 
   <p class="meta-label reveal mb-4">$ git branch --list</p>
 
-  <ul class="reveal-stagger space-y-4">
+  <ul class="space-y-4" data-reveal>
     {
       branches.map((branch) => {
         const tone = toneMap[branch.tone] ?? toneMap.ink;

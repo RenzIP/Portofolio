@@ -207,14 +207,92 @@
     background-size: 100% 1.5px;
   }
 
+  /* --- Scroll-reveal: konten muncul saat masuk viewport --- */
+  .sr-hidden {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .sr-show {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* --- Baris terminal: tiap baris boot muncul berurutan --- */
+  .boot-line {
+    opacity: 0;
+    animation: boot-in 0.28s ease-out forwards;
+  }
+
+  @keyframes boot-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* --- Progress bar boot --- */
+  .boot-bar-fill {
+    width: 0%;
+    transition: width 0.28s ease-out;
+  }
+
+  /* --- Spinner sederhana (untuk state loading) --- */
+  .spinner {
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    border: 1.5px solid var(--color-rule-strong);
+    border-top-color: var(--color-accent-500);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* --- Kursor ketik (untuk animasi typewriter) --- */
+  .type-cursor::after {
+    content: "";
+    display: inline-block;
+    width: 0.55ch;
+    height: 1.05em;
+    margin-left: 1px;
+    background: currentColor;
+    vertical-align: text-bottom;
+    animation: blink 0.9s step-end infinite;
+  }
+
   /* --- Aksesibilitas: hormati preferensi pengguna --- */
   @media (prefers-reduced-motion: reduce) {
     .reveal,
-    .reveal-stagger > * {
+    .reveal-stagger > *,
+    .boot-line {
+      animation: none;
+      opacity: 1;
+    }
+    .link-underline,
+    .boot-bar-fill {
+      transition: none;
+    }
+    .sr-hidden {
+      opacity: 1;
+      transform: none;
+    }
+    .spinner {
       animation: none;
     }
-    .link-underline {
-      transition: none;
+    .type-cursor::after {
+      animation: none;
     }
     html {
       scroll-behavior: auto;

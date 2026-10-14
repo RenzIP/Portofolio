@@ -8,19 +8,68 @@ import RepoLayout from "../layouts/RepoLayout.astro";
 <RepoLayout title="404" file="404.md">
   <div class="py-16">
     <div class="code-block mx-auto max-w-xl p-6">
-      <p class="meta-label mb-3">$ git checkout -- halaman-ini</p>
-      <p class="mb-2 text-sm font-medium text-del">
-        error: pathspec 'halaman-ini' did not match any file(s) known to git
+      <!-- perintah yang diketik -->
+      <p class="mb-3 text-xs text-ink-faint">
+        <span class="text-accent-600">$</span>
+        <span
+          id="err-cmd"
+          class="type-cursor text-ink-soft"
+          data-cmd="git checkout -- halaman-ini"></span>
       </p>
-      <p class="mb-6 text-sm text-ink-soft">
-        Halaman yang Anda tuju tidak ada di repository ini.
-      </p>
-      <a
-        href="/"
-        class="inline-block rounded-md bg-ink px-4 py-2 text-xs font-medium text-paper transition-colors hover:bg-accent-700"
-      >
-        ← kembali ke README.md
-      </a>
+
+      <!-- output error (muncul setelah ketikan selesai) -->
+      <div id="err-out" class="opacity-0 transition-opacity duration-300">
+        <p class="mb-2 text-sm font-medium text-del">
+          error: pathspec 'halaman-ini' did not match any file(s) known to git
+        </p>
+        <p class="mb-6 text-sm text-ink-soft">
+          Halaman yang Anda tuju tidak ada di repository ini.
+        </p>
+        <a
+          href="/"
+          class="inline-block rounded-md bg-ink px-4 py-2 text-xs font-medium text-paper transition-colors hover:bg-accent-700"
+        >
+          ← kembali ke README.md
+        </a>
+      </div>
     </div>
   </div>
 </RepoLayout>
+
+<script>
+  const initError = () => {
+    const cmd = document.getElementById("err-cmd");
+    const out = document.getElementById("err-out");
+    if (!cmd || !out) return;
+
+    const full = cmd.dataset.cmd ?? "";
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const reveal = () => {
+      out.classList.remove("opacity-0");
+      out.classList.add("opacity-100");
+    };
+
+    // tanpa animasi: langsung tampil semua
+    if (reduce) {
+      cmd.textContent = full;
+      reveal();
+      return;
+    }
+
+    let i = 0;
+    const step = () => {
+      if (i <= full.length) {
+        cmd.textContent = full.slice(0, i);
+        i++;
+        setTimeout(step, 38);
+      } else {
+        reveal();
+      }
+    };
+    // mulai sedikit tertunda supaya terasa "mengetik"
+    setTimeout(step, 250);
+  };
+
+  document.addEventListener("astro:page-load", initError);
+</script>

@@ -21,15 +21,23 @@ Dibangun dengan **Astro** + **Tailwind CSS v4**, output HTML statis.
 
 ## Fitur
 
+- **Boot screen** — animasi `git clone` singkat saat kunjungan **pertama** (sekali
+  per sesi, `sessionStorage`); bisa dilewati dengan klik/tombol apa pun, dan
+  otomatis dilewati bila `prefers-reduced-motion` aktif.
 - **Command palette** — tekan `Ctrl+K` (atau `⌘+K`) untuk mencari halaman/proyek.
   Navigasi keyboard penuh: `↑` `↓` pilih, `↵` buka, `Esc` tutup.
 - **View transitions** — perpindahan halaman tanpa reload (SPA-like), tetap statis.
-- **Animasi masuk** — konten muncul halus dengan stagger; otomatis dimatikan
-  bila pengguna mengaktifkan `prefers-reduced-motion`.
+- **Scroll progress bar** — garis amber di atas menunjukkan posisi baca.
+- **Scroll reveal** — section muncul saat masuk viewport (`IntersectionObserver`).
+- **Animasi masuk** — konten muncul halus dengan stagger.
+- **404 dengan efek ketik** — perintah `git checkout` yang gagal, diketik real-time.
 - **Salin email sekali klik** di halaman kontak.
 - **Dark/light** — mengikuti preferensi sistem.
 - **Sitemap & robots.txt** — otomatis saat build.
 - **Favicon** commit-graph kustom (SVG, ringan).
+
+Semua animasi otomatis dimatikan bila pengguna mengaktifkan
+`prefers-reduced-motion` (aksesibilitas).
 
 ## Menjalankan
 
@@ -67,30 +75,33 @@ Prinsip visual:
 ```
 src/
 ├── components/
-│   ├── TopBar.astro         # breadcrumb path + tombol cari + badge branch
-│   ├── FileTree.astro       # sidebar navigasi (desktop)
-│   ├── MobileNav.astro      # navigasi horizontal (mobile)
-│   ├── CommandPalette.astro # palet perintah Ctrl/⌘+K
-│   ├── StatusBar.astro      # footer bergaya status bar
-│   ├── CommitGraph.astro    # timeline gaya `git log --graph`
-│   └── ProjectCard.astro    # kartu entri proyek
+│   ├── BootScreen.astro      # layar loading `git clone` (kunjungan pertama)
+│   ├── ScrollProgress.astro  # bar progress di atas
+│   ├── ScrollReveal.astro    # animasi muncul saat di-scroll
+│   ├── TopBar.astro          # breadcrumb path + tombol cari + badge branch
+│   ├── FileTree.astro        # sidebar navigasi (desktop)
+│   ├── MobileNav.astro       # navigasi horizontal (mobile)
+│   ├── CommandPalette.astro  # palet perintah Ctrl/⌘+K
+│   ├── StatusBar.astro       # footer bergaya status bar
+│   ├── CommitGraph.astro     # timeline gaya `git log --graph`
+│   └── ProjectCard.astro     # kartu entri proyek
 ├── content/
-│   └── projects/            # data proyek (1 file .md per proyek)
+│   └── projects/             # data proyek (1 file .md per proyek)
 ├── data/
-│   └── site.ts              # identitas, file tree, commits, branches — EDIT DI SINI
+│   └── site.ts               # identitas, file tree, commits, branches — EDIT DI SINI
 ├── layouts/
-│   └── RepoLayout.astro     # kerangka utama
+│   └── RepoLayout.astro      # kerangka utama
 ├── pages/
-│   ├── index.astro          # README.md
-│   ├── log.astro            # log.md
-│   ├── branches.astro       # branches.md
-│   ├── contact.astro        # CONTACT.md
-│   ├── 404.astro
+│   ├── index.astro           # README.md
+│   ├── log.astro             # log.md
+│   ├── branches.astro        # branches.md
+│   ├── contact.astro         # CONTACT.md
+│   ├── 404.astro             # 404 dengan efek ketik
 │   └── projects/
 │       ├── index.astro
 │       └── [id].astro
 ├── styles/
-│   └── global.css           # tema + token warna + animasi
+│   └── global.css            # tema + token warna + animasi
 └── content.config.ts
 ```
 
