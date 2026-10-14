@@ -1,6 +1,9 @@
 ---
+/**
+ * projects/[id] — isi satu file proyek.
+ */
 import { getCollection, render } from "astro:content";
-import Layout from "../../layouts/Layout.astro";
+import RepoLayout from "../../layouts/RepoLayout.astro";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
@@ -11,7 +14,7 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
-const { title, summary, tags, date, repo, demo } = project.data;
+const { title, summary, tags, date, repo, demo, status } = project.data;
 const { Content } = await render(project);
 
 const formattedDate = date.toLocaleDateString("id-ID", {
@@ -19,49 +22,65 @@ const formattedDate = date.toLocaleDateString("id-ID", {
   month: "long",
   day: "numeric",
 });
+
+const statusTone: Record<string, string> = {
+  aktif: "border-add/40 bg-add-bg text-add",
+  selesai: "border-rule-strong bg-paper-soft text-ink-soft",
+  arsip: "border-rule-strong bg-paper-soft text-ink-faint",
+};
 ---
 
-<Layout title={title} description={summary}>
+<RepoLayout title={title} description={summary} file={`projects/${project.id}.md`}>
   <a
     href="/projects"
-    class="mb-6 inline-block text-sm text-slate-500 transition-colors hover:text-brand-600 dark:hover:text-brand-400"
+    class="mb-6 inline-block text-xs text-ink-faint transition-colors hover:text-accent-700"
   >
-    ← Kembali ke Projects
+    ← projects/
   </a>
 
   <article>
-    <header class="mb-8 border-b border-slate-200 pb-6 dark:border-slate-800">
-      <h1 class="mb-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
+    <header class="mb-6 border-b border-rule pb-6">
+      <h1 class="mb-3 font-display text-3xl font-bold tracking-tight text-ink">
         {title}
       </h1>
-      <p class="mb-4 text-slate-600 dark:text-slate-400">{summary}</p>
+      <p class="mb-4 max-w-2xl text-sm leading-relaxed text-ink-soft">
+        {summary}
+      </p>
 
-      <div class="flex flex-wrap items-center gap-4 text-sm">
-        <time datetime={date.toISOString()} class="text-slate-400">
+      <div class="flex flex-wrap items-center gap-3 text-xs">
+        <time datetime={date.toISOString()} class="text-ink-faint">
           {formattedDate}
         </time>
-        <ul class="flex flex-wrap gap-2">
-          {
-            tags.map((tag) => (
-              <li class="rounded-full bg-brand-50 px-2.5 py-1 font-mono text-xs text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
-                {tag}
-              </li>
-            ))
-          }
+        {
+          status && (
+            <span
+              class:list={[
+                "rounded-xs border px-1.5 py-px tracking-wide uppercase",
+                statusTone[status] ?? statusTone.selesai,
+              ]}
+            >
+              {status}
+            </span>
+          )
+        }
+        <ul class="flex flex-wrap gap-1.5">
+          {tags.map((tag) => (
+            <li class="chip">{tag}</li>
+          ))}
         </ul>
       </div>
 
       {
         (repo || demo) && (
-          <div class="mt-5 flex gap-3">
+          <div class="mt-5 flex gap-2">
             {repo && (
               <a
                 href={repo}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-brand-600 dark:hover:text-brand-400"
+                class="rounded-md border border-rule-strong px-3 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:border-accent-400 hover:text-accent-700"
               >
-                Lihat Kode
+                source ↗
               </a>
             )}
             {demo && (
@@ -69,9 +88,9 @@ const formattedDate = date.toLocaleDateString("id-ID", {
                 href={demo}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+                class="rounded-md bg-ink px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-accent-700"
               >
-                Live Demo
+                live ↗
               </a>
             )}
           </div>
@@ -80,9 +99,9 @@ const formattedDate = date.toLocaleDateString("id-ID", {
     </header>
 
     <div
-      class="prose prose-slate max-w-none dark:prose-invert prose-headings:font-semibold prose-a:text-brand-600 dark:prose-a:text-brand-400"
+      class="prose prose-sm max-w-none prose-headings:font-display prose-headings:font-semibold prose-headings:text-ink prose-p:text-ink-soft prose-a:text-accent-700 prose-strong:text-ink prose-code:rounded-xs prose-code:bg-paper-sunk prose-code:px-1 prose-code:py-0.5 prose-code:text-accent-800 prose-code:before:content-none prose-code:after:content-none prose-li:text-ink-soft"
     >
       <Content />
     </div>
   </article>
-</Layout>
+</RepoLayout>

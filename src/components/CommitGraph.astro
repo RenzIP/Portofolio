@@ -1,0 +1,66 @@
+---
+/**
+ * CommitGraph — timeline bergaya `git log --graph`.
+ * Menampilkan dot commit, garis vertikal, hash, refs, dan pesan.
+ */
+
+interface Commit {
+  hash: string;
+  date: string;
+  refs: readonly string[];
+  title: string;
+  body: string;
+  stack: readonly string[];
+}
+
+interface Props {
+  commits: readonly Commit[];
+}
+
+const { commits } = Astro.props;
+---
+
+<ol class="relative">
+  {
+    commits.map((commit, i) => (
+      <li class="relative flex gap-4 pb-8 last:pb-0">
+        {/* kolom graph: garis + dot */}
+        <div class="relative flex w-4 shrink-0 justify-center">
+          {i !== commits.length - 1 && (
+            <span
+              class="absolute top-3 bottom-0 w-px bg-rule-strong"
+              aria-hidden="true"
+            />
+          )}
+          <span
+            class="relative mt-1 size-3 shrink-0 rounded-full border-2 border-paper bg-accent-500 ring-1 ring-accent-500"
+            aria-hidden="true"
+          />
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <div class="mb-1 flex flex-wrap items-center gap-2">
+            <code class="text-xs text-accent-700">{commit.hash}</code>
+            {commit.refs.map((ref) => (
+              <span class="chip border-accent-300 bg-accent-50 text-accent-800">
+                {ref}
+              </span>
+            ))}
+            <span class="ml-auto text-xs text-ink-faint">{commit.date}</span>
+          </div>
+
+          <h3 class="mb-1 font-display text-base font-semibold text-ink">
+            {commit.title}
+          </h3>
+          <p class="mb-3 text-sm leading-relaxed text-ink-soft">{commit.body}</p>
+
+          <ul class="flex flex-wrap gap-1.5">
+            {commit.stack.map((tech) => (
+              <li class="chip">{tech}</li>
+            ))}
+          </ul>
+        </div>
+      </li>
+    ))
+  }
+</ol>

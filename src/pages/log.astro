@@ -1,0 +1,26 @@
+---
+/**
+ * log.md — pengalaman kerja sebagai commit log.
+ */
+import RepoLayout from "../layouts/RepoLayout.astro";
+import CommitGraph from "../components/CommitGraph.astro";
+import { commits } from "../data/site";
+---
+
+<RepoLayout title="log" file="log.md">
+  <header class="mb-8">
+    <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
+      <span class="text-accent-500" aria-hidden="true">##</span>
+      log.md
+    </h1>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
+      Riwayat perjalanan saya sebagai developer, ditampilkan seperti commit log —
+      dari yang paling baru ke yang paling awal.
+    </p>
+  </header>
+
+  <div class="code-block p-5">
+    <p class="meta-label mb-4">$ git log --graph --oneline</p>
+    <CommitGraph commits={commits} />
+  </div>
+</RepoLayout>

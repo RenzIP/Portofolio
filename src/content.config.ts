@@ -12,6 +12,7 @@ const projects = defineCollection({
     repo: z.string().url().optional(),
     demo: z.string().url().optional(),
     featured: z.boolean().default(false),
+    status: z.enum(["aktif", "selesai", "arsip"]).default("selesai"),
     cover: z.string().optional(),
   }),
 });

@@ -1,23 +1,26 @@
 ---
-import Layout from "../layouts/Layout.astro";
+/**
+ * 404 — error gaya git.
+ */
+import RepoLayout from "../layouts/RepoLayout.astro";
 ---
 
-<Layout title="404 — Halaman Tidak Ditemukan">
-  <div class="flex flex-col items-center justify-center py-24 text-center">
-    <p class="mb-4 font-mono text-6xl font-bold text-brand-600 dark:text-brand-400">
-      404
-    </p>
-    <h1 class="mb-3 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-      Halaman tidak ditemukan
-    </h1>
-    <p class="mb-8 text-slate-600 dark:text-slate-400">
-      Alamat yang Anda tuju tidak ada atau sudah dipindahkan.
-    </p>
-    <a
-      href="/"
-      class="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-700"
-    >
-      Kembali ke Home
-    </a>
+<RepoLayout title="404" file="404.md">
+  <div class="py-16">
+    <div class="code-block mx-auto max-w-xl p-6">
+      <p class="meta-label mb-3">$ git checkout -- halaman-ini</p>
+      <p class="mb-2 text-sm text-del">
+        error: pathspec 'halaman-ini' did not match any file(s) known to git
+      </p>
+      <p class="mb-6 text-sm text-ink-soft">
+        Halaman yang Anda tuju tidak ada di repository ini.
+      </p>
+      <a
+        href="/"
+        class="inline-block rounded-md bg-ink px-4 py-2 text-xs font-medium text-paper transition-colors hover:bg-accent-700"
+      >
+        ← kembali ke README.md
+      </a>
+    </div>
   </div>
-</Layout>
+</RepoLayout>

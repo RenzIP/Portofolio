@@ -1,6 +1,9 @@
 ---
+/**
+ * projects/ — daftar semua proyek, seperti isi direktori.
+ */
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/Layout.astro";
+import RepoLayout from "../../layouts/RepoLayout.astro";
 import ProjectCard from "../../components/ProjectCard.astro";
 
 const projects = (await getCollection("projects")).sort(
@@ -8,28 +11,28 @@ const projects = (await getCollection("projects")).sort(
 );
 ---
 
-<Layout
-  title="Projects"
-  description="Kumpulan proyek yang pernah saya kerjakan."
->
-  <header class="mb-10">
-    <h1 class="mb-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
-      Projects
+<RepoLayout title="projects" file="projects/">
+  <header class="mb-8">
+    <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
+      <span class="text-violet-500" aria-hidden="true">▸</span>
+      projects/
     </h1>
-    <p class="text-slate-600 dark:text-slate-400">
-      {projects.length} proyek — dari aplikasi mobile sampai website.
+    <p class="text-sm text-ink-soft">
+      {projects.length} entri · diurutkan dari yang terbaru
     </p>
   </header>
 
   {
     projects.length === 0 ? (
-      <p class="text-slate-500">Belum ada proyek yang ditambahkan.</p>
+      <p class="code-block p-5 text-sm text-ink-faint">
+        Direktori kosong. Belum ada proyek.
+      </p>
     ) : (
-      <div class="grid gap-5 sm:grid-cols-2">
+      <div class="grid gap-4 sm:grid-cols-2">
         {projects.map((project) => (
           <ProjectCard project={project} />
         ))}
       </div>
     )
   }
-</Layout>
+</RepoLayout>

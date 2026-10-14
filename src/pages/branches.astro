@@ -1,0 +1,56 @@
+---
+/**
+ * branches.md — keahlian sebagai daftar branch.
+ */
+import RepoLayout from "../layouts/RepoLayout.astro";
+import { branches } from "../data/site";
+
+const toneMap: Record<string, { dot: string; text: string; border: string }> = {
+  accent: { dot: "bg-accent-500", text: "text-accent-800", border: "border-accent-300" },
+  violet: { dot: "bg-violet-500", text: "text-violet-800", border: "border-violet-300" },
+  add: { dot: "bg-add", text: "text-add", border: "border-add/40" },
+  ink: { dot: "bg-ink-faint", text: "text-ink-soft", border: "border-rule-strong" },
+};
+---
+
+<RepoLayout title="branches" file="branches.md">
+  <header class="mb-8">
+    <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
+      <span class="text-accent-500" aria-hidden="true">##</span>
+      branches.md
+    </h1>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
+      Keahlian saya, dipetakan sebagai branch. Tiap branch mewakili satu area
+      kerja yang saya tekuni.
+    </p>
+  </header>
+
+  <p class="meta-label mb-4">$ git branch --list</p>
+
+  <ul class="space-y-4">
+    {
+      branches.map((branch) => {
+        const tone = toneMap[branch.tone] ?? toneMap.ink;
+        return (
+          <li class="rounded-md border border-rule bg-paper p-4 transition-colors hover:border-rule-strong">
+            <div class="mb-2 flex flex-wrap items-center gap-2">
+              <span class:list={["size-2 rounded-full", tone.dot]} aria-hidden="true" />
+              <code class:list={["text-sm font-medium", tone.text]}>{branch.name}</code>
+              <span class="ml-auto text-xs text-ink-faint">
+                {branch.items.length} tech
+              </span>
+            </div>
+            <p class="mb-3 pl-4 text-sm leading-relaxed text-ink-soft">
+              {branch.summary}
+            </p>
+            <ul class="flex flex-wrap gap-1.5 pl-4">
+              {branch.items.map((item) => (
+                <li class:list={["chip", tone.border]}>{item}</li>
+              ))}
+            </ul>
+          </li>
+        );
+      })
+    }
+  </ul>
+</RepoLayout>

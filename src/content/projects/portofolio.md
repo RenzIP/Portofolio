@@ -5,6 +5,7 @@ date: 2026-10-14
 tags: ["Astro", "Tailwind", "TypeScript"]
 repo: "https://github.com/RenzIP"
 featured: true
+status: "aktif"
 ---
 
 ## Tujuan

@@ -1,8 +1,12 @@
 ---
+/**
+ * Halaman utama — dibingkai sebagai README.md
+ */
 import { getCollection } from "astro:content";
-import Layout from "../layouts/Layout.astro";
+import RepoLayout from "../layouts/RepoLayout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
-import { site } from "../data/site";
+import CommitGraph from "../components/CommitGraph.astro";
+import { repo, commits } from "../data/site";
 
 const featured = (await getCollection("projects"))
   .filter((p) => p.data.featured)
@@ -10,73 +14,95 @@ const featured = (await getCollection("projects"))
   .slice(0, 4);
 ---
 
-<Layout title="Portofolio" description={site.tagline}>
-  <section class="mb-20">
-    <p class="mb-3 font-mono text-sm text-brand-600 dark:text-brand-400">
-      Halo, saya {site.name} 👋
-    </p>
-    <h1
-      class="mb-6 max-w-3xl text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-slate-100"
-    >
-      {site.role} yang suka membangun produk rapi dan cepat.
-    </h1>
-    <p class="mb-8 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-      {site.tagline}
-    </p>
-    <div class="flex flex-wrap gap-3">
+<RepoLayout title="README" file="README.md">
+  <!-- Blok intro gaya blok kode komentar -->
+  <section class="mb-14">
+    <div class="code-block mb-6 p-5">
+      <p class="meta-label mb-2">$ whoami</p>
+      <h1
+        class="font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-4xl"
+      >
+        {repo.owner}
+      </h1>
+      <p class="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft sm:text-base">
+        {repo.tagline}
+      </p>
+      <p class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-faint">
+        <span>📍 {repo.location}</span>
+        <span class="flex items-center gap-1.5">
+          <span class="size-1.5 rounded-full bg-add" aria-hidden="true"></span>
+          {repo.status}
+        </span>
+      </p>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
       <a
         href="/projects"
-        class="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+        class="rounded-md bg-ink px-4 py-2 text-xs font-medium text-paper transition-colors hover:bg-accent-700"
       >
-        Lihat Proyek
+        Lihat proyek →
       </a>
       <a
         href="/contact"
-        class="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-brand-600 dark:hover:text-brand-400"
+        class="rounded-md border border-rule-strong px-4 py-2 text-xs font-medium text-ink-soft transition-colors hover:border-accent-400 hover:text-accent-700"
       >
-        Hubungi Saya
+        Hubungi saya
       </a>
     </div>
   </section>
 
-  <section class="mb-20">
-    <h2 class="mb-6 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-      Keahlian
+  <!-- ## About -->
+  <section class="mb-14">
+    <h2
+      class="mb-4 flex items-baseline gap-2 font-display text-xl font-semibold text-ink"
+    >
+      <span class="text-accent-500" aria-hidden="true">##</span>
+      Tentang
     </h2>
-    <div class="grid gap-6 sm:grid-cols-2">
+    <div class="space-y-3 border-l-2 border-rule pl-5">
       {
-        site.skills.map(({ group, items }) => (
-          <div class="rounded-xl border border-slate-200 p-5 dark:border-slate-800">
-            <h3 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-              {group}
-            </h3>
-            <ul class="flex flex-wrap gap-2">
-              {items.map((item) => (
-                <li class="rounded-md bg-slate-100 px-2.5 py-1 font-mono text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+        repo.about.map((paragraph) => (
+          <p class="max-w-3xl text-sm leading-relaxed text-ink-soft">
+            {paragraph}
+          </p>
         ))
       }
     </div>
   </section>
 
-  <section>
-    <div class="mb-6 flex items-baseline justify-between">
-      <h2 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-        Proyek Unggulan
+  <!-- ## Featured projects -->
+  <section class="mb-14">
+    <div class="mb-4 flex items-baseline justify-between gap-4">
+      <h2
+        class="flex items-baseline gap-2 font-display text-xl font-semibold text-ink"
+      >
+        <span class="text-accent-500" aria-hidden="true">##</span>
+        Proyek unggulan
       </h2>
       <a
         href="/projects"
-        class="text-sm text-brand-600 hover:underline dark:text-brand-400"
+        class="shrink-0 text-xs text-ink-faint transition-colors hover:text-accent-700"
       >
-        Semua proyek →
+        semua →
       </a>
     </div>
-    <div class="grid gap-5 sm:grid-cols-2">
+    <div class="grid gap-4 sm:grid-cols-2">
       {featured.map((project) => <ProjectCard project={project} />)}
     </div>
   </section>
-</Layout>
+
+  <!-- ## Recent commits -->
+  <section>
+    <h2
+      class="mb-4 flex items-baseline gap-2 font-display text-xl font-semibold text-ink"
+    >
+      <span class="text-accent-500" aria-hidden="true">##</span>
+      Aktivitas terbaru
+    </h2>
+    <div class="code-block p-5">
+      <p class="meta-label mb-4">$ git log --oneline</p>
+      <CommitGraph commits={commits} />
+    </div>
+  </section>
+</RepoLayout>

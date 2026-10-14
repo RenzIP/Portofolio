@@ -1,58 +1,71 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import { site } from "../data/site";
+/**
+ * CONTACT.md — kontak sebagai file markdown.
+ */
+import RepoLayout from "../layouts/RepoLayout.astro";
+import { repo, socials } from "../data/site";
 ---
 
-<Layout
-  title="Contact"
+<RepoLayout
+  title="CONTACT"
+  file="CONTACT.md"
   description="Cara menghubungi saya untuk kolaborasi atau peluang kerja."
 >
-  <header class="mb-12">
-    <h1 class="mb-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
-      Hubungi Saya
+  <header class="mb-8">
+    <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
+      <span class="text-accent-500" aria-hidden="true">##</span>
+      CONTACT.md
     </h1>
-    <p class="max-w-2xl text-lg text-slate-600 dark:text-slate-400">
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
       Punya proyek, pertanyaan, atau ingin berkolaborasi? Saya senang mendengarnya.
+      Cara tercepat adalah lewat email.
     </p>
   </header>
 
-  <div class="grid gap-10 lg:grid-cols-2">
-    <section>
-      <h2 class="mb-4 text-sm font-semibold tracking-wide text-slate-900 uppercase dark:text-slate-100">
-        Lewat Email
-      </h2>
-      <p class="mb-4 text-slate-600 dark:text-slate-400">
-        Cara paling cepat adalah mengirim email. Saya biasanya membalas dalam 1–2 hari kerja.
-      </p>
-      <a
-        href={`mailto:${site.email}`}
-        class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-700"
-      >
-        {site.email}
-      </a>
-    </section>
+  <section class="mb-10">
+    <p class="meta-label mb-3">$ git remote -v</p>
+    <ul class="space-y-2">
+      {
+        socials.map((social) => (
+          <li>
+            <a
+              href={social.href}
+              target={social.href.startsWith("mailto:") ? undefined : "_blank"}
+              rel="noopener noreferrer"
+              class="group flex items-center gap-3 rounded-md border border-rule bg-paper px-4 py-3 transition-colors hover:border-accent-400"
+            >
+              <span class="text-xs text-ink-faint">{social.label.toLowerCase()}</span>
+              <span class="ml-auto truncate text-sm text-ink-soft transition-colors group-hover:text-accent-700">
+                {social.handle}
+              </span>
+              <span class="shrink-0 text-ink-faint transition-colors group-hover:text-accent-600" aria-hidden="true">
+                ↗
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
 
-    <section>
-      <h2 class="mb-4 text-sm font-semibold tracking-wide text-slate-900 uppercase dark:text-slate-100">
-        Media Sosial
-      </h2>
-      <ul class="space-y-3">
-        {
-          site.socials.map(({ label, href }) => (
-            <li>
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700 dark:border-slate-800 dark:text-slate-300 dark:hover:border-brand-600 dark:hover:text-brand-400"
-              >
-                <span>{label}</span>
-                <span aria-hidden="true">→</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
-  </div>
-</Layout>
+  <section class="code-block p-5">
+    <p class="meta-label mb-3">// preferensi kerja</p>
+    <dl class="space-y-2 text-sm">
+      <div class="flex gap-4">
+        <dt class="w-24 shrink-0 text-ink-faint">lokasi</dt>
+        <dd class="text-ink-soft">{repo.location}</dd>
+      </div>
+      <div class="flex gap-4">
+        <dt class="w-24 shrink-0 text-ink-faint">status</dt>
+        <dd class="flex items-center gap-1.5 text-ink-soft">
+          <span class="size-1.5 rounded-full bg-add" aria-hidden="true"></span>
+          {repo.status}
+        </dd>
+      </div>
+      <div class="flex gap-4">
+        <dt class="w-24 shrink-0 text-ink-faint">fokus</dt>
+        <dd class="text-ink-soft">Web full-stack · antarmuka &amp; API</dd>
+      </div>
+    </dl>
+  </section>
+</RepoLayout>

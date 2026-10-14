@@ -5,6 +5,7 @@ date: 2026-09-20
 tags: ["Flutter", "Dart", "OOP"]
 repo: "https://github.com/RenzIP/silog-714240042"
 featured: true
+status: "aktif"
 ---
 
 ## Latar belakang

@@ -1,0 +1,55 @@
+---
+/**
+ * FileTree — sidebar navigasi bergaya file explorer.
+ */
+import { fileTree } from "../data/site";
+
+const current = Astro.url.pathname;
+const isActive = (path: string) =>
+  path === "/" ? current === "/" : current.startsWith(path);
+---
+
+<nav aria-label="Berkas" class="text-sm">
+  <p class="meta-label mb-3 px-2">Explorer</p>
+
+  {
+    fileTree.map((group) => (
+      <div class="mb-2">
+        <p class="flex items-center gap-1.5 px-2 py-1 text-xs text-ink-soft">
+          <span aria-hidden="true">▾</span>
+          <span class="font-medium">{group.dir}</span>
+        </p>
+        <ul class="ml-3 border-l border-rule">
+          {group.files.map((file) => {
+            const active = isActive(file.path);
+            return (
+              <li>
+                <a
+                  href={file.path}
+                  aria-current={active ? "page" : undefined}
+                  class:list={[
+                    "flex items-center gap-2 border-l-2 py-1.5 pr-2 pl-3 text-xs transition-colors",
+                    active
+                      ? "border-accent-500 bg-accent-50 font-medium text-accent-800"
+                      : "border-transparent text-ink-soft hover:bg-paper-soft hover:text-ink",
+                  ]}
+                >
+                  <span
+                    class:list={[
+                      "shrink-0",
+                      file.isDir ? "text-violet-500" : "text-ink-faint",
+                    ]}
+                    aria-hidden="true"
+                  >
+                    {file.isDir ? "▸" : "·"}
+                  </span>
+                  <span class="truncate">{file.label}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))
+  }
+</nav>
