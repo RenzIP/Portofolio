@@ -3,13 +3,14 @@
  * ProjectCard — kartu proyek bergaya entri file di dalam repo.
  */
 import type { CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
 
 interface Props {
   project: CollectionEntry<"projects">;
 }
 
 const { project } = Astro.props;
-const { title, summary, tags, date, repo, demo, status } = project.data;
+const { title, summary, tags, date, repo, demo, status, cover } = project.data;
 
 const formattedDate = date.toLocaleDateString("id-ID", {
   year: "numeric",
@@ -24,69 +25,87 @@ const statusTone: Record<string, string> = {
 ---
 
 <article
-  class="group relative flex flex-col rounded-md border border-rule bg-paper p-4 transition-all hover:border-accent-400 hover:shadow-lift"
+  class="group relative flex h-full flex-col overflow-hidden rounded-md border border-rule bg-paper transition-all hover:border-accent-400 hover:shadow-lift"
 >
-  <header class="mb-2 flex items-start gap-2">
-    <span class="mt-0.5 shrink-0 text-violet-500" aria-hidden="true">▸</span>
-    <div class="min-w-0 flex-1">
-      <h3 class="font-display text-base font-semibold text-ink">
-        <a
-          href={`/projects/${project.id}`}
-          class="after:absolute after:inset-0 hover:text-accent-700"
-        >
-          {title}
-        </a>
-      </h3>
-      <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-faint">
-        <time datetime={date.toISOString()}>{formattedDate}</time>
-        {
-          status && (
-            <span
-              class:list={[
-                "rounded-xs border px-1.5 py-px text-[0.65rem] tracking-wide uppercase",
-                statusTone[status] ?? statusTone.selesai,
-              ]}
-            >
-              {status}
-            </span>
-          )
-        }
+  {
+    cover && (
+      <div class="overflow-hidden border-b border-rule bg-paper-soft">
+        <Image
+          src={cover}
+          alt={`Tangkapan layar proyek ${title}`}
+          widths={[400, 800, 1200]}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 480px"
+          loading="lazy"
+          decoding="async"
+          class="aspect-[1200/630] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+        />
       </div>
-    </div>
-  </header>
+    )
+  }
 
-  <p class="mb-3 flex-1 pl-5 text-sm leading-relaxed text-ink-soft">
-    {summary}
-  </p>
+  <div class="flex flex-1 flex-col p-4">
+    <header class="mb-2 flex items-start gap-2">
+      <span class="mt-0.5 shrink-0 text-violet-500" aria-hidden="true">▸</span>
+      <div class="min-w-0 flex-1">
+        <h3 class="font-display text-base font-semibold text-ink">
+          <a
+            href={`/projects/${project.id}`}
+            class="after:absolute after:inset-0 hover:text-accent-700"
+          >
+            {title}
+          </a>
+        </h3>
+        <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-faint">
+          <time datetime={date.toISOString()}>{formattedDate}</time>
+          {
+            status && (
+              <span
+                class:list={[
+                  "rounded-xs border px-1.5 py-px text-[0.65rem] tracking-wide uppercase",
+                  statusTone[status] ?? statusTone.selesai,
+                ]}
+              >
+                {status}
+              </span>
+            )
+          }
+        </div>
+      </div>
+    </header>
 
-  <ul class="mb-3 flex flex-wrap gap-1.5 pl-5">
-    {tags.map((tag) => <li class="chip">{tag}</li>)}
-  </ul>
+    <p class="mb-3 flex-1 pl-5 text-sm leading-relaxed text-ink-soft">
+      {summary}
+    </p>
 
-  <footer class="relative z-10 flex gap-4 pl-5 text-xs">
-    {
-      repo && (
-        <a
-          href={repo}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-ink-faint transition-colors hover:text-accent-700"
-        >
-          source ↗
-        </a>
-      )
-    }
-    {
-      demo && (
-        <a
-          href={demo}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-ink-faint transition-colors hover:text-accent-700"
-        >
-          live ↗
-        </a>
-      )
-    }
-  </footer>
+    <ul class="mb-3 flex flex-wrap gap-1.5 pl-5">
+      {tags.map((tag) => <li class="chip">{tag}</li>)}
+    </ul>
+
+    <footer class="relative z-10 flex gap-4 pl-5 text-xs">
+      {
+        repo && (
+          <a
+            href={repo}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-ink-faint transition-colors hover:text-accent-700"
+          >
+            source ↗
+          </a>
+        )
+      }
+      {
+        demo && (
+          <a
+            href={demo}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-ink-faint transition-colors hover:text-accent-700"
+          >
+            live ↗
+          </a>
+        )
+      }
+    </footer>
+  </div>
 </article>

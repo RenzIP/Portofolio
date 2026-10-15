@@ -22,6 +22,10 @@ interface Props {
   file: string;
   /** Slug gambar OG (lihat src/pages/open-graph/[...route].ts). */
   ogSlug?: string;
+  /** Data tambahan untuk structured data (mis. proyek). */
+  schemaExtra?: Record<string, unknown>;
+  /** Cegah halaman diindeks mesin pencari (mis. 404). */
+  noindex?: boolean;
 }
 
 const {
@@ -29,6 +33,8 @@ const {
   description = repo.tagline,
   file,
   ogSlug,
+  schemaExtra,
+  noindex = false,
 } = Astro.props;
 
 const siteName = `${repo.owner}/${repo.name}`;
@@ -43,6 +49,77 @@ const derivedSlug =
       ? `project-${pathSegments[1]}`
       : pathSegments.join("-");
 const ogImage = new URL(`/open-graph/${ogSlug ?? derivedSlug}.png`, canonical).href;
+
+/* ---------- Structured data (JSON-LD) ---------- */
+// Person: identitas pemilik situs, dipakai di semua halaman.
+const personSchema = {
+  "@type": "Person",
+  "@id": `${canonical.origin}/#person`,
+  name: repo.owner,
+  jobTitle: "Full-Stack Web Developer",
+  description: repo.tagline,
+  url: canonical.origin,
+  email: `mailto:${repo.email}`,
+  knowsAbout: [
+    "Web Development",
+    "Frontend Development",
+    "Backend Development",
+    "TypeScript",
+    "Astro",
+    "Flutter",
+  ],
+  sameAs: ["https://github.com/RenzIP"],
+};
+
+// WebSite + WebPage, ditautkan ke Person.
+const pageSchema = {
+  "@type": pathSegments[0] === "projects" ? "CollectionPage" : "WebPage",
+  "@id": `${canonical.href}#webpage`,
+  url: canonical.href,
+  name: `${title} · ${siteName}`,
+  description,
+  inLanguage: "id-ID",
+  isPartOf: { "@id": `${canonical.origin}/#website` },
+  about: { "@id": `${canonical.origin}/#person` },
+  ...(schemaExtra ?? {}),
+};
+
+// Breadcrumb: beranda + segmen path.
+const breadcrumbItems = [
+  { name: "Home", item: canonical.origin },
+  ...pathSegments.map((seg, i) => ({
+    name: seg,
+    item: new URL("/" + pathSegments.slice(0, i + 1).join("/"), canonical.origin)
+      .href,
+  })),
+];
+const breadcrumbSchema = {
+  "@type": "BreadcrumbList",
+  itemListElement: breadcrumbItems.map((b, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: b.name,
+    item: b.item,
+  })),
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${canonical.origin}/#website`,
+      url: canonical.origin,
+      name: siteName,
+      description: repo.tagline,
+      inLanguage: "id-ID",
+      publisher: { "@id": `${canonical.origin}/#person` },
+    },
+    personSchema,
+    pageSchema,
+    breadcrumbSchema,
+  ],
+};
 ---
 
 <!doctype html>
@@ -56,6 +133,7 @@ const ogImage = new URL(`/open-graph/${ogSlug ?? derivedSlug}.png`, canonical).h
 
     <title>{title} · {siteName}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={siteName} />
@@ -71,6 +149,15 @@ const ogImage = new URL(`/open-graph/${ogSlug ?? derivedSlug}.png`, canonical).h
     <meta name="twitter:title" content={`${title} · ${siteName}`} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
+    <!-- Structured data -->
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(jsonLd)}
+    />
 
     <ClientRouter />
   </head>

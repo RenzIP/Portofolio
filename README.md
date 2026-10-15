@@ -38,6 +38,12 @@ Dibangun dengan **Astro** + **Tailwind CSS v4**, output HTML statis.
   WhatsApp/LinkedIn/Telegram tampil bergambar.
 - **Sitemap & robots.txt** — otomatis saat build.
 - **Favicon** commit-graph kustom (SVG, ringan).
+- **Gambar teroptimasi** — cover proyek diproses `astro:assets`: konversi WebP
+  otomatis (35 KB → 2–10 KB), `srcset` responsif 3 varian, lazy loading.
+- **Structured data (JSON-LD)** — `WebSite` + `Person` + `WebPage` +
+  `BreadcrumbList`, dan `SoftwareSourceCode` di halaman proyek.
+- **Security headers** — `_headers` untuk Cloudflare Pages/Netlify: CSP,
+  HSTS, X-Frame-Options, Permissions-Policy, + aturan cache per-jalur.
 
 Semua animasi otomatis dimatikan bila pengguna mengaktifkan
 `prefers-reduced-motion` (aksesibilitas).
@@ -107,8 +113,13 @@ src/
 │       └── [id].astro
 ├── styles/
 │   └── global.css            # tema + token warna + animasi
+├── assets/
+│   └── projects/             # cover proyek (diproses astro:assets)
 ├── og-fonts/                 # font TTF untuk generate OG image
 └── content.config.ts
+
+scripts/
+└── gen-covers.cjs            # generate placeholder cover proyek
 ```
 
 ## Cara menambah proyek

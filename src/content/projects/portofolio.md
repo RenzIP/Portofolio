@@ -6,6 +6,7 @@ tags: ["Astro", "Tailwind", "TypeScript"]
 repo: "https://github.com/RenzIP"
 featured: true
 status: "aktif"
+cover: "../../assets/projects/portofolio.png"
 ---
 
 ## Tujuan
