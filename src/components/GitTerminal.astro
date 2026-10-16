@@ -1,0 +1,212 @@
+---
+/**
+ * GitTerminal — easter egg: overlay terminal mini bergaya
+ * `git log --graph --oneline --all --decorate`.
+ *
+ * Dibuka dengan Konami code (↑↑↓↓←→←→BA). Sesuai prinsip delight:
+ * tidak menyembunyikan fungsi wajib, bisa ditutup kapan saja (Esc),
+ * dan nonaktif total saat prefers-reduced-motion.
+ */
+import { commits } from "../data/site";
+
+const rows = commits.map((c) => ({
+  hash: c.hash,
+  title: c.title,
+  refs: [...c.refs],
+}));
+const rowsJson = JSON.stringify(rows);
+---
+
+<div
+  id="git-term"
+  class="fixed inset-0 z-[90] hidden items-center justify-center p-4"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Terminal git (easter egg)"
+  data-rows={rowsJson}
+>
+  <div
+    id="git-term-backdrop"
+    class="absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
+  >
+  </div>
+
+  <div
+    class="relative w-full max-w-xl overflow-hidden rounded-md border border-rule-strong bg-ink text-[13px] leading-relaxed text-paper shadow-lift"
+  >
+    <div class="flex items-center gap-2 border-b border-white/10 px-3 py-2">
+      <span class="flex gap-1.5" aria-hidden="true">
+        <span class="size-2.5 rounded-full bg-del"></span>
+        <span class="size-2.5 rounded-full bg-accent-400"></span>
+        <span class="size-2.5 rounded-full bg-add"></span>
+      </span>
+      <span class="font-mono text-xs text-paper/60"
+        >renz@portofolio: ~/renz</span
+      >
+      <button
+        id="git-term-close"
+        type="button"
+        class="ml-auto rounded-xs px-1.5 py-0.5 font-mono text-xs text-paper/60 transition-colors hover:bg-white/10 hover:text-paper"
+        aria-label="Tutup terminal"
+      >
+        ✕ esc
+      </button>
+    </div>
+
+    <div class="p-4 font-mono">
+      <p class="mb-3 text-paper/80">
+        <span class="text-accent-400">$</span> git log --graph --oneline --all --decorate
+      </p>
+      <pre
+        id="git-term-out"
+        class="overflow-x-auto whitespace-pre text-paper/90"
+        aria-live="polite"></pre>
+      <p class="mt-3 text-paper/60">
+        <span class="text-accent-400">$</span>
+        <span class="type-cursor" aria-hidden="true"></span>
+        <span class="sr-only">Menunggu perintah…</span>
+      </p>
+    </div>
+
+    <div class="border-t border-white/10 px-4 py-2 font-mono text-[0.65rem] text-paper/50">
+      easter egg · ditemukan via Konami code ↑↑↓↓←→←→BA
+    </div>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  // Script polos (tanpa anotasi TS) supaya lolos astro check.
+  // Data commit dibaca dari data-rows pada elemen #git-term.
+  const seq = [
+    "ArrowUp",
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowLeft",
+    "ArrowRight",
+    "b",
+    "a",
+  ];
+  let pos = 0;
+
+  const readRows = () => {
+    const term = document.getElementById("git-term");
+    try {
+      const raw = term ? term.dataset.rows || "[]" : "[]";
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const buildLines = (rows) =>
+    rows.map((r, i) => {
+      const dot = i === rows.length - 1 ? "○" : "●";
+      const connector = i === 0 ? "" : i === rows.length - 1 ? "  " : "│ ";
+      const refs = Array.isArray(r.refs) ? r.refs : [];
+      const refStr = refs.length ? " (" + refs.join(", ") + ")" : "";
+      return connector + dot + " " + r.hash + refStr + " " + r.title;
+    });
+
+  let typing = false;
+  const renderTyped = (out) => {
+    if (!out || typing) return;
+    typing = true;
+    const lines = buildLines(readRows());
+    out.textContent = "";
+    let li = 0;
+    let ci = 0;
+    const step = () => {
+      if (li >= lines.length) {
+        typing = false;
+        return;
+      }
+      ci++;
+      out.textContent = lines
+        .slice(0, li)
+        .concat([lines[li].slice(0, ci)])
+        .join("\n");
+      if (ci >= lines[li].length) {
+        li++;
+        ci = 0;
+        setTimeout(step, 120);
+      } else {
+        setTimeout(step, 8);
+      }
+    };
+    step();
+  };
+
+  const openTerm = () => {
+    const term = document.getElementById("git-term");
+    const out = document.getElementById("git-term-out");
+    const closeBtn = document.getElementById("git-term-close");
+    if (!term || term.dataset.disabled === "1") return;
+    term.classList.remove("hidden");
+    term.classList.add("flex");
+    renderTyped(out);
+    if (closeBtn) closeBtn.focus();
+  };
+
+  const closeTerm = () => {
+    const term = document.getElementById("git-term");
+    if (!term) return;
+    term.classList.add("hidden");
+    term.classList.remove("flex");
+  };
+
+  const initEgg = () => {
+    const term = document.getElementById("git-term");
+    const backdrop = document.getElementById("git-term-backdrop");
+    const closeBtn = document.getElementById("git-term-close");
+    if (!term || term.dataset.bound === "1") return;
+    term.dataset.bound = "1";
+
+    // Nonaktif total saat reduced-motion.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      term.dataset.disabled = "1";
+      return;
+    }
+
+    if (backdrop) backdrop.addEventListener("click", closeTerm);
+    if (closeBtn) closeBtn.addEventListener("click", closeTerm);
+
+    if (!window.__konamiBound) {
+      window.__konamiBound = true;
+      window.addEventListener("keydown", (e) => {
+        // Jangan ganggu saat user mengetik di input/textarea.
+        const t = e.target;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) {
+          pos = 0;
+          return;
+        }
+        const termEl = document.getElementById("git-term");
+        const isOpen = termEl && !termEl.classList.contains("hidden");
+        if (isOpen) {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            closeTerm();
+          }
+          pos = 0;
+          return;
+        }
+        const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+        pos = key === seq[pos] ? pos + 1 : key === seq[0] ? 1 : 0;
+        if (pos === seq.length) {
+          pos = 0;
+          openTerm();
+        }
+      });
+    }
+  };
+
+  document.addEventListener("astro:page-load", () => {
+    closeTerm();
+    initEgg();
+  });
+</script>

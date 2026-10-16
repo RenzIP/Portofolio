@@ -26,7 +26,18 @@ Dibangun dengan **Astro** + **Tailwind CSS v4**, output HTML statis.
   otomatis dilewati bila `prefers-reduced-motion` aktif.
 - **Command palette** — tekan `Ctrl+K` (atau `⌘+K`) untuk mencari halaman/proyek.
   Navigasi keyboard penuh: `↑` `↓` pilih, `↵` buka, `Esc` tutup.
-- **View transitions** — perpindahan halaman tanpa reload (SPA-like), tetap statis.
+- **View transitions** — perpindahan halaman gaya `git checkout` (konten lama
+  geser kiri, konten baru masuk dari kanan, arah dibalik saat back).
+  TopBar + sidebar persisten antar halaman (`transition:persist`).
+- **Commit graph hidup** — dot HEAD berdenyut (pause saat offscreen), klik hash
+  untuk menyalin (dengan fallback non-secure context), garis vertikal
+  tergambar perlahan saat masuk viewport.
+- **Status bar hidup** — jam lokal live (update tiap 30 detik) + label branch
+  mengikuti halaman aktif.
+- **Micro-interaction** — tombol CTA terasa "ditekan" (`pressable`, scale 0.97,
+  120ms); hormat `prefers-reduced-motion`.
+- **Easter egg terminal** — Konami code (↑↑↓↓←→←→BA) membuka overlay terminal
+  `git log --graph` dengan efek ketik; nonaktif saat reduced-motion.
 - **Scroll progress bar** — garis amber di atas menunjukkan posisi baca.
 - **Scroll reveal** — section muncul saat masuk viewport (`IntersectionObserver`).
 - **Animasi masuk** — konten muncul halus dengan stagger.
@@ -91,7 +102,8 @@ src/
 │   ├── FileTree.astro        # sidebar navigasi (desktop)
 │   ├── MobileNav.astro       # navigasi horizontal (mobile)
 │   ├── CommandPalette.astro  # palet perintah Ctrl/⌘+K
-│   ├── StatusBar.astro       # footer bergaya status bar
+│   ├── GitTerminal.astro     # easter egg terminal (Konami code)
+│   ├── StatusBar.astro       # footer bergaya status bar (jam live)
 │   ├── CommitGraph.astro     # timeline gaya `git log --graph`
 │   └── ProjectCard.astro     # kartu entri proyek
 ├── content/

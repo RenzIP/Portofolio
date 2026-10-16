@@ -207,6 +207,28 @@
     background-size: 100% 1.5px;
   }
 
+  /* --- Micro-interaction: tombol terasa "ditekan" ---
+     Skala 0.98 + shadow mengecil, 100-150ms (aturan timing feedback). */
+  .pressable {
+    transition:
+      transform 0.12s ease-out,
+      box-shadow 0.12s ease-out,
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .pressable:active {
+    transform: scale(0.97);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pressable {
+      transition: none;
+    }
+    .pressable:active {
+      transform: none;
+    }
+  }
+
   /* --- Scroll-reveal: konten muncul saat masuk viewport --- */
   .sr-hidden {
     opacity: 0;
@@ -272,6 +294,53 @@
     animation: blink 0.9s step-end infinite;
   }
 
+  /* --- Dot HEAD berdenyut halus (seperti indikator "live") ---
+     Pulse dibatasi ke dot HEAD saja, berhenti saat offscreen via
+     IntersectionObserver di component, dan mati total saat
+     prefers-reduced-motion. */
+  .head-dot {
+    position: relative;
+  }
+  .head-dot::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-accent-500);
+    opacity: 0;
+    animation: head-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .head-dot-paused::after {
+    animation-play-state: paused;
+    opacity: 0;
+  }
+  @keyframes head-ping {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.9;
+    }
+    70%,
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  /* --- Garis commit tergambar perlahan saat masuk viewport ---
+     Digerakkan oleh ScrollReveal (class .drawn), fallback: langsung penuh. */
+  .commit-line {
+    transform-origin: top;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .commit-line-draw {
+      transform: scaleY(0);
+    }
+    .commit-line-draw.drawn {
+      transform: scaleY(1);
+      transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+
   /* --- Aksesibilitas: hormati preferensi pengguna --- */
   @media (prefers-reduced-motion: reduce) {
     .reveal,
@@ -279,6 +348,10 @@
     .boot-line {
       animation: none;
       opacity: 1;
+    }
+    .head-dot::after {
+      animation: none;
+      opacity: 0;
     }
     .link-underline,
     .boot-bar-fill {

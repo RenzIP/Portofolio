@@ -10,6 +10,7 @@ import FileTree from "../components/FileTree.astro";
 import MobileNav from "../components/MobileNav.astro";
 import StatusBar from "../components/StatusBar.astro";
 import CommandPalette from "../components/CommandPalette.astro";
+import GitTerminal from "../components/GitTerminal.astro";
 import BootScreen from "../components/BootScreen.astro";
 import ScrollProgress from "../components/ScrollProgress.astro";
 import ScrollReveal from "../components/ScrollReveal.astro";
@@ -123,7 +124,7 @@ const jsonLd = {
 ---
 
 <!doctype html>
-<html lang="id">
+<html lang="id" transition:animate="none">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -160,6 +161,33 @@ const jsonLd = {
     />
 
     <ClientRouter />
+
+    <!-- Transisi halaman gaya "git checkout": konten lama meluncur sedikit
+         ke kiri sambil memudar, konten baru masuk dari kanan. Durasi
+         pendek supaya terasa responsif. ClientRouter Astro otomatis
+         menonaktifkan semua animasi saat prefers-reduced-motion. -->
+    <style is:global>
+      @keyframes repo-out {
+        from {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(-18px);
+        }
+      }
+      @keyframes repo-in {
+        from {
+          opacity: 0;
+          transform: translateX(22px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+    </style>
   </head>
 
   <body class="flex min-h-screen flex-col bg-paper">
@@ -173,18 +201,53 @@ const jsonLd = {
       Lompat ke konten
     </a>
 
-    <TopBar />
+    <TopBar transition:persist="site-topbar" />
 
     <div class="mx-auto flex w-full max-w-6xl flex-1 gap-8 px-4 py-8">
       <!-- Sidebar: file tree (sembunyi di layar kecil) -->
-      <aside class="hidden w-52 shrink-0 md:block">
+      <aside class="hidden w-52 shrink-0 md:block" transition:persist="site-sidebar">
         <div class="sticky top-20">
           <FileTree />
         </div>
       </aside>
 
       <!-- Area editor -->
-      <main id="main" class="min-w-0 flex-1">
+      <!-- Transisi custom "git checkout" via transition:animate (pola resmi
+           astro:transitions): halaman lama keluar ke kiri, halaman baru
+           masuk dari kanan. Mundur (back) dibalik arahnya. -->
+      <main
+        id="main"
+        class="min-w-0 flex-1"
+        transition:name="repo-main"
+        transition:animate={{
+          forwards: {
+            old: {
+              name: "repo-out",
+              duration: "0.22s",
+              easing: "cubic-bezier(0.33, 1, 0.68, 1)",
+            },
+            new: {
+              name: "repo-in",
+              duration: "0.32s",
+              easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+            },
+          },
+          backwards: {
+            old: {
+              name: "repo-in",
+              duration: "0.22s",
+              easing: "cubic-bezier(0.33, 1, 0.68, 1)",
+              direction: "reverse",
+            },
+            new: {
+              name: "repo-out",
+              duration: "0.32s",
+              easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+              direction: "reverse",
+            },
+          },
+        }}
+      >
         <MobileNav />
 
         <!-- header file, seperti tab editor -->
@@ -203,6 +266,7 @@ const jsonLd = {
     <StatusBar />
 
     <CommandPalette />
+    <GitTerminal />
     <ScrollReveal />
   </body>
 </html>
