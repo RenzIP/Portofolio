@@ -25,6 +25,7 @@ const files = fileTree.flatMap((group) => group.files);
             <li class="shrink-0">
               <a
                 href={file.path}
+                data-nav-link={file.path}
                 aria-current={active ? "page" : undefined}
                 class:list={[
                   "flex items-center gap-1.5 rounded-sm border px-2.5 py-1.5 whitespace-nowrap transition-colors",

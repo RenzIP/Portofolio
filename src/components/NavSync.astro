@@ -1,0 +1,81 @@
+---
+/**
+ * NavSync — sinkronisasi state aktif navigasi setelah navigasi client-side.
+ *
+ * Masalah: elemen dengan `transition:persist` (TopBar, sidebar FileTree)
+ * tidak di-render ulang saat pindah halaman via ClientRouter, sehingga
+ * highlight aktif + breadcrumb terjebak di halaman pertama yang dibuka.
+ *
+ * Solusi: tiap `astro:page-load`, hitung ulang dari `location.pathname`
+ * dan update DOM yang persisten.
+ */
+---
+
+<script>
+  // @ts-nocheck
+  // Pola sama seperti ScrollProgress: guard global agar listener sekali pasang.
+
+  const ACTIVE_FILE =
+    "border-accent-500 bg-accent-50 font-medium text-accent-800";
+  const IDLE_FILE =
+    "border-transparent text-ink-soft hover:bg-paper-soft hover:text-ink";
+  const ACTIVE_MOBILE =
+    "border-accent-400 bg-accent-50 font-medium text-accent-800";
+  const IDLE_MOBILE =
+    "border-rule text-ink-soft hover:border-rule-strong hover:text-ink";
+
+  const setClasses = (el, active) => {
+    const inFileTree = !!el.closest("[data-file-tree]");
+    const on = (inFileTree ? ACTIVE_FILE : ACTIVE_MOBILE).split(" ");
+    const off = (inFileTree ? IDLE_FILE : IDLE_MOBILE).split(" ");
+    el.classList.remove(...(active ? off : on));
+    el.classList.add(...(active ? on : off));
+    if (active) {
+      el.setAttribute("aria-current", "page");
+    } else {
+      el.removeAttribute("aria-current");
+    }
+  };
+
+  const isActivePath = (linkPath, current) =>
+    linkPath === "/" ? current === "/" : current.startsWith(linkPath);
+
+  const fileLabel = (pathname) => {
+    if (pathname === "/") return "README.md";
+    if (pathname === "/projects") return "projects/";
+    if (pathname.startsWith("/projects/")) {
+      const slug = pathname.split("/").filter(Boolean).pop() ?? "";
+      return `projects/${slug}.md`;
+    }
+    return pathname.replace(/^\//, "") + ".md";
+  };
+
+  const syncNav = () => {
+    // Normalisasi: trailing slash dihapus ("/log/" -> "/log"), root tetap "/".
+    const raw = window.location.pathname;
+    const current = raw.length > 1 ? raw.replace(/\/$/, "") : raw;
+    // Semua link nav (FileTree persist + MobileNav yang di-swap).
+    document.querySelectorAll("a[data-nav-link]").forEach((a) => {
+      const linkPath = a.getAttribute("data-nav-link") ?? "";
+      setClasses(a, isActivePath(linkPath, current));
+    });
+    // Breadcrumb di TopBar (persist).
+    const crumb = document.querySelector("[data-path-label]");
+    if (crumb) crumb.textContent = fileLabel(window.location.pathname);
+    // Label branch di status bar mengikuti segmen pertama path.
+    const branch = document.querySelector("[data-status-branch]");
+    if (branch) {
+      const seg = window.location.pathname.split("/").filter(Boolean)[0];
+      branch.textContent = seg ?? branch.textContent;
+    }
+  };
+
+  document.addEventListener("astro:page-load", syncNav);
+
+  if (!window.__navSyncBound) {
+    window.__navSyncBound = true;
+    // Fallback kalau event Astro belum kepasang (mis. load pertama lambat).
+    if (document.readyState !== "loading") syncNav();
+    else document.addEventListener("DOMContentLoaded", syncNav, { once: true });
+  }
+</script>
