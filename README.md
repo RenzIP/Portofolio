@@ -43,7 +43,6 @@ Dibangun dengan **Astro** + **Tailwind CSS v4**, output HTML statis.
 - **Animasi masuk** — konten muncul halus dengan stagger.
 - **404 dengan efek ketik** — perintah `git checkout` yang gagal, diketik real-time.
 - **Salin email sekali klik** di halaman kontak.
-- **Dark/light** — mengikuti preferensi sistem.
 - **OG image otomatis** — setiap halaman & proyek punya kartu preview 1200×630
   yang digenerate saat build (`astro-og-canvas`), jadi link yang di-share ke
   WhatsApp/LinkedIn/Telegram tampil bergambar.
@@ -66,6 +65,8 @@ npm install
 npm run dev      # dev server di http://localhost:4321
 npm run build    # build ke ./dist
 npm run preview  # preview hasil build
+
+node scripts/gen-covers.cjs   # generate ulang cover proyek (PNG 1200×630)
 ```
 
 ## Konsep desain
@@ -155,17 +156,38 @@ Isi lengkap dalam Markdown...
 
 Halaman detail otomatis dibuat di `/projects/proyek-baru`.
 
-## Yang perlu diganti sebelum publish
+## Status & yang tersisa
 
-1. `src/data/site.ts` — nama, tagline, email, lokasi, file tree, `commits`, `branches`
-2. `src/content/projects/*.md` — ganti dengan proyek aslimu
-3. `astro.config.mjs` — nilai `site` → domain asli
-4. `public/favicon.svg` — favicon sendiri
+Sudah beres:
+
+- **Identitas nyata** — nama, email, dan LinkedIn di `src/data/site.ts`
+  (dipakai juga oleh JSON-LD dan meta tag).
+- **Domain produksi** `https://bagasip.my.id` di `astro.config.mjs`,
+  `siteUrl` (`src/data/site.ts`), dan `public/robots.txt`.
+- **7 entri proyek.** Field `commits` memakai short-hash commit **asli** dari
+  repository publik di `github.com/RenzIP`, jadi tiap hash bisa dibuka dan
+  diverifikasi lewat link repo di sampingnya.
+- **Cover proyek** digenerate `scripts/gen-covers.cjs` — kartu desain
+  1200×630, bukan screenshot dan bukan placeholder.
+
+Yang masih perlu bahan dari pemilik situs:
+
+1. **Screenshot asli** tiap proyek — timpa `src/assets/projects/<slug>.png`
+   (rasio 1200×630), lalu `npm run build`. Cover sekarang kartu desain;
+   screenshot asli selalu lebih meyakinkan.
+2. **Angka hasil** per proyek (jumlah pengguna, waktu muat, ukuran data) —
+   hanya kalau datanya benar-benar ada dan bisa dipertanggungjawabkan.
+3. `public/favicon.svg` kalau mau favicon sendiri.
 
 ## Deploy
 
-Gratis via Cloudflare Pages atau Vercel:
+Situs ini statis — tidak butuh server. Domain `bagasip.my.id` sudah dikelola di
+Cloudflare, jadi jalur terpendeknya Cloudflare Pages:
 
 - **Build command**: `npm run build`
 - **Output directory**: `dist`
 - **Node version**: 22.12.0 atau lebih baru
+
+Setelah deploy pertama, tambahkan `bagasip.my.id` sebagai custom domain di
+project Pages tersebut. `public/_headers` (CSP, HSTS, cache) otomatis dibaca
+Cloudflare Pages.

@@ -5,9 +5,9 @@ import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
-  // Ganti dengan domain aslimu setelah deploy (mis. https://renz.pages.dev).
-  // Dipakai untuk canonical URL dan sitemap.
-  site: "https://example.com",
+  // Domain produksi. Dipakai untuk canonical URL, OG image, dan sitemap.
+  // Harus sama dengan `siteUrl` di src/data/site.ts.
+  site: "https://bagasip.my.id",
   integrations: [
     sitemap({
       // Kecualikan halaman error & aset OG image dari sitemap.

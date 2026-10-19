@@ -15,7 +15,7 @@ import NavSync from "../components/NavSync.astro";
 import BootScreen from "../components/BootScreen.astro";
 import ScrollProgress from "../components/ScrollProgress.astro";
 import ScrollReveal from "../components/ScrollReveal.astro";
-import { repo } from "../data/site";
+import { repo, socials } from "../data/site";
 
 interface Props {
   title: string;
@@ -54,23 +54,32 @@ const ogImage = new URL(`/open-graph/${ogSlug ?? derivedSlug}.png`, canonical).h
 
 /* ---------- Structured data (JSON-LD) ---------- */
 // Person: identitas pemilik situs, dipakai di semua halaman.
+// `socials` jadi sumber tunggal untuk sameAs, supaya link di halaman
+// kontak dan data terstruktur tidak pernah berbeda.
+const socialUrls = socials
+  .filter((s) => s.href.startsWith("http"))
+  .map((s) => s.href);
+
 const personSchema = {
   "@type": "Person",
   "@id": `${canonical.origin}/#person`,
-  name: repo.owner,
+  name: repo.author,
+  alternateName: repo.owner,
   jobTitle: "Full-Stack Web Developer",
   description: repo.tagline,
   url: canonical.origin,
   email: `mailto:${repo.email}`,
   knowsAbout: [
     "Web Development",
-    "Frontend Development",
-    "Backend Development",
+    "Full-Stack Development",
+    "Go",
     "TypeScript",
+    "Next.js",
     "Astro",
+    "Laravel",
     "Flutter",
   ],
-  sameAs: ["https://github.com/RenzIP"],
+  sameAs: socialUrls,
 };
 
 // WebSite + WebPage, ditautkan ke Person.
@@ -130,8 +139,20 @@ const jsonLd = {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="author" content={repo.author} />
+    <meta name="theme-color" content="#fbfbfa" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
+
+    <!-- Deteksi platform untuk label shortcut (⌘ di macOS, Ctrl di lainnya).
+         Inline & sinkron supaya label tidak berkedip saat halaman dimuat. -->
+    <script is:inline>
+      document.documentElement.dataset.mod = /Mac|iPhone|iPad|iPod/.test(
+        navigator.platform || navigator.userAgent,
+      )
+        ? "mac"
+        : "pc";
+    </script>
 
     <title>{title} · {siteName}</title>
     <meta name="description" content={description} />
@@ -145,12 +166,14 @@ const jsonLd = {
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${title} · ${siteName}`} />
     <meta property="og:locale" content="id_ID" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${title} · ${siteName}`} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={`${title} · ${siteName}`} />
 
     <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 

@@ -44,7 +44,8 @@ const commands = [...fileCommands, ...externalCommands];
     class="relative mx-4 w-full max-w-lg overflow-hidden rounded-md border border-rule-strong bg-paper shadow-lift"
   >
     <div class="flex items-center gap-2 border-b border-rule px-3">
-      <span class="text-xs text-ink-faint" aria-hidden="true">⌘</span>
+      <span class="text-xs text-ink-faint only-mac" aria-hidden="true">⌘</span>
+      <span class="text-xs text-ink-faint only-pc" aria-hidden="true">Ctrl</span>
       <input
         id="cmdk-input"
         type="text"

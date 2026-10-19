@@ -6,6 +6,8 @@
 
 interface Commit {
   hash: string;
+  /** Nama repo publik asal commit ini, untuk link verifikasi. */
+  source?: string;
   date: string;
   refs: readonly string[];
   title: string;
@@ -55,6 +57,17 @@ const { commits } = Astro.props;
               >
                 <code>{commit.hash}</code>
               </button>
+              {commit.source && (
+                <a
+                  href={`https://github.com/RenzIP/${commit.source}/commit/${commit.hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={`Commit ${commit.hash} di ${commit.source}`}
+                  class="truncate text-xs text-ink-faint transition-colors hover:text-accent-700"
+                >
+                  {commit.source} ↗
+                </a>
+              )}
               {commit.refs.map((ref) => (
                 <span class="chip border-accent-300 bg-accent-50 text-accent-800">
                   {ref}

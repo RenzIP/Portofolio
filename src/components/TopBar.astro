@@ -23,7 +23,7 @@ const pathLabel =
   >
     <!-- breadcrumb gaya path -->
     <div class="flex min-w-0 items-center gap-1.5">
-      <span class="shrink-0 text-ink-faint" aria-hidden="true">⌥</span>
+      <span class="shrink-0 text-ink-faint" aria-hidden="true">~</span>
       <span class="shrink-0 text-ink-soft">{repo.owner}</span>
       <span class="shrink-0 text-ink-faint">/</span>
       <a
@@ -44,7 +44,8 @@ const pathLabel =
         class="flex items-center gap-1.5 rounded-sm border border-rule px-2 py-1 text-[0.7rem] text-ink-faint transition-colors hover:border-rule-strong hover:text-ink"
         aria-label="Buka palet perintah"
       >
-        <span aria-hidden="true">⌘</span>
+        <span class="only-mac" aria-hidden="true">⌘</span>
+        <span class="only-pc" aria-hidden="true">Ctrl</span>
         <span class="hidden sm:inline">cari…</span>
         <kbd
           class="ml-0.5 hidden rounded-xs border border-rule bg-paper-soft px-1 py-px font-mono text-[0.6rem] sm:inline"

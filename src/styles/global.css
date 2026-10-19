@@ -80,6 +80,19 @@
   }
 }
 
+@layer base {
+  /* Label shortcut: ⌘ hanya di macOS, Ctrl di platform lain.
+     Tanpa JavaScript (html tanpa data-mod) default-nya Ctrl, karena
+     mayoritas pengunjung memakai Windows/Linux. */
+  html:not([data-mod="mac"]) .only-mac {
+    display: none !important;
+  }
+
+  html[data-mod="mac"] .only-pc {
+    display: none !important;
+  }
+}
+
 @layer components {
   /* --- Gutter nomor baris (kiri, seperti editor) --- */
   .gutter {

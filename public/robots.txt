@@ -4,4 +4,4 @@ Allow: /
 # Blokir halaman yang tidak perlu diindeks
 Disallow: /404
 
-Sitemap: https://example.com/sitemap-index.xml
+Sitemap: https://bagasip.my.id/sitemap-index.xml

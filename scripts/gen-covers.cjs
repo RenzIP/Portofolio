@@ -1,5 +1,11 @@
-// Generate placeholder cover untuk tiap proyek (SVG → PNG via sharp).
+// Generate cover proyek (SVG → PNG via sharp).
 // Gaya: kartu repo — kertas terang, aksen amber/violet, judul + stack.
+//
+// Catatan: ini cover DESAIN, bukan screenshot. Tidak ada teks "placeholder"
+// di dalam gambar — kalau nanti ada screenshot asli, timpa file PNG dengan
+// nama yang sama, lalu jalankan `npm run build`.
+//
+// Jalankan: node scripts/gen-covers.cjs
 const fs = require("node:fs");
 const path = require("node:path");
 const sharp = require("sharp");
@@ -7,14 +13,56 @@ const sharp = require("sharp");
 const OUT = "src/assets/projects";
 fs.mkdirSync(OUT, { recursive: true });
 
+const SITE = "bagasip.my.id";
+
 const projects = [
+  {
+    slug: "gradi-ol",
+    title: "GraDiOl",
+    subtitle: "Editor Diagram Kolaboratif",
+    accent: "#f59e0b",
+    tags: ["Go", "Next.js", "Redis"],
+    badge: "v1.0",
+  },
+  {
+    slug: "chat-socket",
+    title: "Anonymous Chat",
+    subtitle: "Chat Desktop Real-time",
+    accent: "#8b5cf6",
+    tags: ["Python", "WebSocket", "Tkinter"],
+    badge: "2026",
+  },
+  {
+    slug: "hospital-desktop",
+    title: "Hospital Mgmt",
+    subtitle: "Aplikasi Desktop C#",
+    accent: "#1a7f37",
+    tags: ["C#", "WinForms", "Excel"],
+    badge: "2026",
+  },
+  {
+    slug: "e-commerce",
+    title: "E-Commerce",
+    subtitle: "Toko Online Laravel",
+    accent: "#cf222e",
+    tags: ["Laravel", "PHP", "Livewire"],
+    badge: "2026",
+  },
+  {
+    slug: "marketplace-talas",
+    title: "Talas Sangkuriang",
+    subtitle: "Katalog Produk",
+    accent: "#b45309",
+    tags: ["HTML", "CSS", "JavaScript"],
+    badge: "2026",
+  },
   {
     slug: "silog",
     title: "Silog",
     subtitle: "Sistem Logistik",
     accent: "#f59e0b",
     tags: ["Flutter", "Dart", "OOP"],
-    badge: "GD-BDG",
+    badge: "KULIAH",
   },
   {
     slug: "portofolio",
@@ -30,11 +78,10 @@ const W = 1200;
 const H = 630;
 
 const esc = (s) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function svg({ title, subtitle, accent, tags, badge }) {
-  // chip lebar seragam supaya rapi
-  const CHIP_W = 176;
+function svg({ slug, title, subtitle, accent, tags, badge }) {
+  const CHIP_W = 196;
   const CHIP_GAP = 14;
   const tagChips = tags
     .map((t, i) => {
@@ -46,6 +93,9 @@ function svg({ title, subtitle, accent, tags, badge }) {
             fill="#44443f" text-anchor="middle">${esc(t)}</text>`;
     })
     .join("");
+
+  // judul panjang dikecilkan supaya tidak menabrak tepi kanan
+  const titleSize = title.length > 14 ? 64 : 82;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
@@ -65,6 +115,9 @@ function svg({ title, subtitle, accent, tags, badge }) {
   <!-- aksen kiri -->
   <rect x="0" y="0" width="14" height="${H}" fill="${accent}"/>
 
+  <!-- path repo, kiri atas -->
+  <text x="72" y="96" font-family="monospace" font-size="22" fill="#6b6b64">~/projects/${esc(slug)}</text>
+
   <!-- badge kanan atas -->
   <rect x="${W - 220}" y="56" width="148" height="46" rx="4"
         fill="#fbfbfa" stroke="${accent}" stroke-width="2"/>
@@ -72,7 +125,7 @@ function svg({ title, subtitle, accent, tags, badge }) {
         fill="${accent}" text-anchor="middle" font-weight="bold">${esc(badge)}</text>
 
   <!-- judul -->
-  <text x="72" y="250" font-family="sans-serif" font-size="82" font-weight="bold"
+  <text x="72" y="250" font-family="sans-serif" font-size="${titleSize}" font-weight="bold"
         fill="#1a1a1a">${esc(title)}</text>
   <text x="72" y="330" font-family="monospace" font-size="40"
         fill="#44443f">${esc(subtitle)}</text>
@@ -88,7 +141,9 @@ function svg({ title, subtitle, accent, tags, badge }) {
 
   <!-- footer -->
   <text x="72" y="${H - 40}" font-family="monospace" font-size="20"
-        fill="#6b6b64">placeholder — ganti dengan screenshot asli</text>
+        fill="#6b6b64">${esc(SITE)}</text>
+  <text x="${W - 72}" y="${H - 40}" font-family="monospace" font-size="20"
+        fill="#6b6b64" text-anchor="end">${esc(slug)}.md</text>
 </svg>`;
 }
 
