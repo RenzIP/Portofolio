@@ -4,15 +4,25 @@
  */
 import type { CollectionEntry } from "astro:content";
 import { Image } from "astro:assets";
+import {
+  getLang,
+  localizePath,
+  projectSlug,
+  t,
+  type Lang,
+} from "../i18n/utils";
 
 interface Props {
   project: CollectionEntry<"projects">;
+  lang?: Lang;
 }
 
 const { project } = Astro.props;
+const lang = getLang(Astro.props.lang);
 const { title, summary, tags, date, repo, demo, status, cover } = project.data;
+const slug = projectSlug(project.id);
 
-const formattedDate = date.toLocaleDateString("id-ID", {
+const formattedDate = date.toLocaleDateString(lang === "id" ? "id-ID" : lang, {
   year: "numeric",
   month: "short",
 });
@@ -21,6 +31,14 @@ const statusTone: Record<string, string> = {
   aktif: "border-add/40 bg-add-bg text-add",
   selesai: "border-rule-strong bg-paper-soft text-ink-soft",
   arsip: "border-rule-strong bg-paper-soft text-ink-faint",
+};
+
+/** Nilai status di frontmatter tetap bahasa Indonesia (nilai data);
+ *  yang diterjemahkan hanya tampilannya. */
+const statusLabel: Record<string, "projActive" | "projDone" | "projArchived"> = {
+  aktif: "projActive",
+  selesai: "projDone",
+  arsip: "projArchived",
 };
 ---
 
@@ -49,7 +67,7 @@ const statusTone: Record<string, string> = {
       <div class="min-w-0 flex-1">
         <h3 class="font-display text-base font-semibold text-ink">
           <a
-            href={`/projects/${project.id}`}
+            href={localizePath(`/projects/${slug}`, lang)}
             class="after:absolute after:inset-0 hover:text-accent-700"
           >
             {title}
@@ -65,7 +83,7 @@ const statusTone: Record<string, string> = {
                   statusTone[status] ?? statusTone.selesai,
                 ]}
               >
-                {status}
+                {t(lang, statusLabel[status] ?? "projDone")}
               </span>
             )
           }
@@ -90,7 +108,7 @@ const statusTone: Record<string, string> = {
             rel="noopener noreferrer"
             class="text-ink-faint transition-colors hover:text-accent-700"
           >
-            source ↗
+            {t(lang, "projSource")}
           </a>
         )
       }
@@ -102,7 +120,7 @@ const statusTone: Record<string, string> = {
             rel="noopener noreferrer"
             class="text-ink-faint transition-colors hover:text-accent-700"
           >
-            live ↗
+            {t(lang, "projLive")}
           </a>
         )
       }

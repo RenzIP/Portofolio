@@ -16,12 +16,16 @@ import BootScreen from "../components/BootScreen.astro";
 import ScrollProgress from "../components/ScrollProgress.astro";
 import ScrollReveal from "../components/ScrollReveal.astro";
 import { repo, socials } from "../data/site";
+import { htmlLang, locales, ogLocale } from "../i18n/ui";
+import { canonicalPath, getLang, localizePath, ogPrefix, t, type Lang } from "../i18n/utils";
 
 interface Props {
   title: string;
   description?: string;
   /** Nama file yang ditampilkan di header editor. */
   file: string;
+  /** Bahasa halaman ini (default: id). */
+  lang?: Lang;
   /** Slug gambar OG (lihat src/pages/open-graph/[...route].ts). */
   ogSlug?: string;
   /** Data tambahan untuk structured data (mis. proyek). */
@@ -30,27 +34,39 @@ interface Props {
   noindex?: boolean;
 }
 
-const {
-  title,
-  description = repo.tagline,
-  file,
-  ogSlug,
-  schemaExtra,
-  noindex = false,
-} = Astro.props;
+const { title, file, ogSlug, schemaExtra, noindex = false } = Astro.props;
+const lang = getLang(Astro.props.lang);
+const description: string = Astro.props.description ?? t(lang, "tagline");
+
+/** Nilai BCP-47 untuk JSON-LD (mis. id-ID, ja-JP). */
+const schemaLang = ogLocale[lang].replace("_", "-");
 
 const siteName = `${repo.owner}/${repo.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
 
-// Gambar OG: pakai slug eksplisit kalau ada, kalau tidak turunkan dari path.
-const pathSegments = Astro.url.pathname.split("/").filter(Boolean);
+/** Padanan halaman ini di semua bahasa, untuk <link rel="alternate">. */
+const canonicalUrlPath = canonicalPath(Astro.url.pathname);
+const alternates = locales.map((code) => ({
+  code,
+  href: new URL(
+    localizePath(canonicalUrlPath, code),
+    Astro.site ?? Astro.url.origin,
+  ).href,
+}));
+
+// Gambar OG: pakai slug eksplisit kalau ada, kalau tidak turunkan dari path
+// kanonik (tanpa prefix bahasa) — satu OG image dipakai semua bahasa.
+const pathSegments = canonicalUrlPath.split("/").filter(Boolean);
 const derivedSlug =
-  Astro.url.pathname === "/"
+  canonicalUrlPath === "/"
     ? "home"
     : pathSegments[0] === "projects" && pathSegments.length > 1
       ? `project-${pathSegments[1]}`
       : pathSegments.join("-");
-const ogImage = new URL(`/open-graph/${ogSlug ?? derivedSlug}.png`, canonical).href;
+const ogImage = new URL(
+  `/open-graph/${ogPrefix(lang)}${ogSlug ?? derivedSlug}.png`,
+  canonical,
+).href;
 
 /* ---------- Structured data (JSON-LD) ---------- */
 // Person: identitas pemilik situs, dipakai di semua halaman.
@@ -89,7 +105,7 @@ const pageSchema = {
   url: canonical.href,
   name: `${title} · ${siteName}`,
   description,
-  inLanguage: "id-ID",
+  inLanguage: schemaLang,
   isPartOf: { "@id": `${canonical.origin}/#website` },
   about: { "@id": `${canonical.origin}/#person` },
   ...(schemaExtra ?? {}),
@@ -123,7 +139,7 @@ const jsonLd = {
       url: canonical.origin,
       name: siteName,
       description: repo.tagline,
-      inLanguage: "id-ID",
+      inLanguage: schemaLang,
       publisher: { "@id": `${canonical.origin}/#person` },
     },
     personSchema,
@@ -134,7 +150,13 @@ const jsonLd = {
 ---
 
 <!doctype html>
-<html lang="id" transition:animate="none">
+<html
+  lang={htmlLang[lang]}
+  data-locale-prefixes={locales
+    .filter((code) => code !== "id")
+    .join(" ")}
+  transition:animate="none"
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -143,6 +165,15 @@ const jsonLd = {
     <meta name="theme-color" content="#fbfbfa" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
+
+    <!-- Padanan halaman ini di tiap bahasa. Membantu mesin pencari memilih
+         versi yang tepat untuk tiap pengunjung, bukan menandainya duplikat. -->
+    {
+      alternates.map((alt) => (
+        <link rel="alternate" hreflang={alt.code} href={alt.href} />
+      ))
+    }
+    <link rel="alternate" hreflang="x-default" href={alternates[0].href} />
 
     <!-- Deteksi platform untuk label shortcut (⌘ di macOS, Ctrl di lainnya).
          Inline & sinkron supaya label tidak berkedip saat halaman dimuat. -->
@@ -167,7 +198,7 @@ const jsonLd = {
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={`${title} · ${siteName}`} />
-    <meta property="og:locale" content="id_ID" />
+    <meta property="og:locale" content={ogLocale[lang]} />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${title} · ${siteName}`} />
@@ -222,16 +253,16 @@ const jsonLd = {
       href="#main"
       class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-ink focus:px-3 focus:py-2 focus:text-xs focus:text-paper"
     >
-      Lompat ke konten
+      {t(lang, "skipToContent")}
     </a>
 
-    <TopBar transition:persist="site-topbar" />
+    <TopBar lang={lang} transition:persist="site-topbar" />
 
     <div class="mx-auto flex w-full max-w-6xl flex-1 gap-8 px-4 py-8">
       <!-- Sidebar: file tree (sembunyi di layar kecil) -->
       <aside class="hidden w-52 shrink-0 md:block" transition:persist="site-sidebar">
         <div class="sticky top-20">
-          <FileTree />
+          <FileTree lang={lang} />
         </div>
       </aside>
 
@@ -272,7 +303,7 @@ const jsonLd = {
           },
         }}
       >
-        <MobileNav />
+        <MobileNav lang={lang} />
 
         <!-- header file, seperti tab editor -->
         <div
@@ -287,9 +318,9 @@ const jsonLd = {
       </main>
     </div>
 
-    <StatusBar />
+    <StatusBar lang={lang} />
 
-    <CommandPalette />
+    <CommandPalette lang={lang} />
     <GitTerminal />
     <NavSync />
     <ScrollReveal />

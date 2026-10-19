@@ -1,20 +1,50 @@
 ---
 /**
- * Halaman utama — dibingkai sebagai README.md
+ * Halaman utama — dibingkai sebagai README.md.
+ *
+ * Satu file ini menghasilkan SEMUA bahasa: `/` (id), `/en/`, `/ja/`, `/zh/`.
+ * Rest parameter `[...lang]` boleh kosong, jadi home bahasa default tidak
+ * perlu punya file terpisah.
  */
 import { getCollection } from "astro:content";
-import RepoLayout from "../layouts/RepoLayout.astro";
-import ProjectCard from "../components/ProjectCard.astro";
-import CommitGraph from "../components/CommitGraph.astro";
-import { repo, commits } from "../data/site";
+import RepoLayout from "../../layouts/RepoLayout.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import CommitGraph from "../../components/CommitGraph.astro";
+import { commits, repo } from "../../data/site";
+import { ui } from "../../i18n/ui";
+import {
+  getLang,
+  locales,
+  localizePath,
+  projectLang,
+  t,
+  type Lang,
+} from "../../i18n/utils";
 
+export function getStaticPaths() {
+  return [
+    { params: { lang: undefined } },
+    ...locales
+      .filter((code) => code !== "id")
+      .map((code) => ({ params: { lang: code } })),
+  ];
+}
+
+const lang: Lang = getLang(Astro.params.lang);
+
+// Entri konten punya id seperti "gradi-ol" (id) atau "en/gradi-ol" (lainnya).
+// Ambil hanya entri milik bahasa halaman ini.
 const featured = (await getCollection("projects"))
-  .filter((p) => p.data.featured)
+  .filter((p) => projectLang(p.id) === lang && p.data.featured)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 6);
+
+const aboutParagraphs = ui[lang].about;
+const projectsUrl = localizePath("/projects", lang);
+const contactUrl = localizePath("/contact", lang);
 ---
 
-<RepoLayout title="README" file="README.md">
+<RepoLayout title="README" file="README.md" lang={lang}>
   <!-- Blok intro gaya blok kode komentar -->
   <section class="reveal mb-14">
     <div class="code-block mb-6 p-5">
@@ -25,29 +55,29 @@ const featured = (await getCollection("projects"))
         {repo.author}<span class="caret" aria-hidden="true"></span>
       </h1>
       <p class="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft sm:text-base">
-        {repo.tagline}
+        {t(lang, "tagline")}
       </p>
       <p class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-faint">
         <span>📍 {repo.location}</span>
         <span class="flex items-center gap-1.5">
           <span class="size-1.5 rounded-full bg-add" aria-hidden="true"></span>
-          {repo.status}
+          {t(lang, "status")}
         </span>
       </p>
     </div>
 
     <div class="flex flex-wrap gap-2">
       <a
-        href="/projects"
+        href={projectsUrl}
         class="pressable rounded-md bg-ink px-4 py-2 text-xs font-medium text-paper hover:bg-accent-700"
       >
-        Lihat proyek →
+        {t(lang, "ctaProjects")}
       </a>
       <a
-        href="/contact"
+        href={contactUrl}
         class="pressable rounded-md border border-rule-strong px-4 py-2 text-xs font-medium text-ink-soft hover:border-accent-400 hover:text-accent-700"
       >
-        Hubungi saya
+        {t(lang, "ctaContact")}
       </a>
     </div>
   </section>
@@ -58,11 +88,11 @@ const featured = (await getCollection("projects"))
       class="mb-4 flex items-baseline gap-2 font-display text-xl font-semibold text-ink"
     >
       <span class="text-accent-500" aria-hidden="true">##</span>
-      Tentang
+      {t(lang, "secAbout")}
     </h2>
     <div class="space-y-3 border-l-2 border-rule pl-5">
       {
-        repo.about.map((paragraph) => (
+        aboutParagraphs.map((paragraph) => (
           <p class="max-w-3xl text-sm leading-relaxed text-ink-soft">
             {paragraph}
           </p>
@@ -78,17 +108,17 @@ const featured = (await getCollection("projects"))
         class="flex items-baseline gap-2 font-display text-xl font-semibold text-ink"
       >
         <span class="text-accent-500" aria-hidden="true">##</span>
-        Proyek unggulan
+        {t(lang, "secFeatured")}
       </h2>
       <a
-        href="/projects"
+        href={projectsUrl}
         class="shrink-0 text-xs text-ink-faint transition-colors hover:text-accent-700"
       >
-        semua →
+        {t(lang, "seeAll")}
       </a>
     </div>
     <div class="reveal-stagger grid gap-4 sm:grid-cols-2">
-      {featured.map((project) => <ProjectCard project={project} />)}
+      {featured.map((project) => <ProjectCard project={project} lang={lang} />)}
     </div>
   </section>
 
@@ -98,7 +128,7 @@ const featured = (await getCollection("projects"))
       class="mb-4 flex items-baseline gap-2 font-display text-xl font-semibold text-ink"
     >
       <span class="text-accent-500" aria-hidden="true">##</span>
-      Aktivitas terbaru
+      {t(lang, "secActivity")}
     </h2>
     <div class="code-block p-5">
       <p class="meta-label mb-4">$ git log --oneline</p>

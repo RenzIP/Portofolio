@@ -1,0 +1,37 @@
+---
+/**
+ * log.md — riwayat proyek sebagai commit log.
+ */
+import RepoLayout from "../../layouts/RepoLayout.astro";
+import CommitGraph from "../../components/CommitGraph.astro";
+import { commits } from "../../data/site";
+import { getLang, locales, t, type Lang } from "../../i18n/utils";
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: undefined } },
+    ...locales
+      .filter((code) => code !== "id")
+      .map((code) => ({ params: { lang: code } })),
+  ];
+}
+
+const lang: Lang = getLang(Astro.params.lang);
+---
+
+<RepoLayout title="log" file="log.md" lang={lang}>
+  <header class="reveal mb-8">
+    <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
+      <span class="text-accent-500" aria-hidden="true">##</span>
+      log.md
+    </h1>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
+      {t(lang, "logIntro")}
+    </p>
+  </header>
+
+  <div class="code-block p-5" data-reveal>
+    <p class="meta-label mb-4">$ git log --graph --oneline</p>
+    <CommitGraph commits={commits} />
+  </div>
+</RepoLayout>

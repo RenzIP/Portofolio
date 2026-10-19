@@ -43,6 +43,10 @@ Dibangun dengan **Astro** + **Tailwind CSS v4**, output HTML statis.
 - **Animasi masuk** — konten muncul halus dengan stagger.
 - **404 dengan efek ketik** — perintah `git checkout` yang gagal, diketik real-time.
 - **Salin email sekali klik** di halaman kontak.
+- **4 bahasa** — Indonesia (default, tanpa prefix), Inggris (`/en/`), Jepang
+  (`/ja/`), Cina (`/zh/`). Tiap bahasa punya URL sendiri, jadi bisa di-bookmark,
+  dibagikan, dan dirayapi mesin pencari. Tautan `hreflang` mengarahkan Google ke
+  versi yang tepat, dan OG image-nya juga terpisah per bahasa.
 - **OG image otomatis** — setiap halaman & proyek punya kartu preview 1200×630
   yang digenerate saat build (`astro-og-canvas`), jadi link yang di-share ke
   WhatsApp/LinkedIn/Telegram tampil bergambar.
@@ -99,7 +103,8 @@ src/
 │   ├── BootScreen.astro      # layar loading `git clone` (kunjungan pertama)
 │   ├── ScrollProgress.astro  # bar progress di atas
 │   ├── ScrollReveal.astro    # animasi muncul saat di-scroll
-│   ├── TopBar.astro          # breadcrumb path + tombol cari + badge branch
+│   ├── TopBar.astro          # breadcrumb path + tombol cari + pemilih bahasa
+│   ├── LanguageSwitcher.astro # tautan ID / EN / JA / ZH
 │   ├── FileTree.astro        # sidebar navigasi (desktop)
 │   ├── MobileNav.astro       # navigasi horizontal (mobile)
 │   ├── CommandPalette.astro  # palet perintah Ctrl/⌘+K
@@ -108,22 +113,30 @@ src/
 │   ├── CommitGraph.astro     # timeline gaya `git log --graph`
 │   └── ProjectCard.astro     # kartu entri proyek
 ├── content/
-│   └── projects/             # data proyek (1 file .md per proyek)
+│   └── projects/             # data proyek — 1 file .md per proyek per bahasa
+│       ├── *.md              # bahasa Indonesia (default)
+│       ├── en/*.md           # Inggris
+│       ├── ja/*.md           # Jepang
+│       └── zh/*.md           # Cina
 ├── data/
 │   └── site.ts               # identitas, file tree, commits, branches — EDIT DI SINI
+├── i18n/
+│   ├── ui.ts                 # kamus teks UI (id/en/ja/zh)
+│   └── utils.ts              # helper bahasa, path ber-locale, terjemahan
 ├── layouts/
 │   └── RepoLayout.astro      # kerangka utama
 ├── pages/
-│   ├── index.astro           # README.md
-│   ├── log.astro             # log.md
-│   ├── branches.astro        # branches.md
-│   ├── contact.astro         # CONTACT.md
-│   ├── 404.astro             # 404 dengan efek ketik
-│   ├── open-graph/
-│   │   └── [...route].ts     # generator OG image
-│   └── projects/
-│       ├── index.astro
-│       └── [id].astro
+│   ├── [...lang]/
+│   │   ├── index.astro       # README.md  (juga /en/, /ja/, /zh/)
+│   │   ├── log.astro         # log.md
+│   │   ├── branches.astro    # branches.md
+│   │   ├── contact.astro     # CONTACT.md
+│   │   └── projects/
+│   │       ├── index.astro   # daftar proyek
+│   │       └── [id].astro    # detail proyek
+│   ├── 404.astro             # 404 dengan efek ketik (satu bahasa)
+│   └── open-graph/
+│       └── [...route].ts     # generator OG image (per bahasa)
 ├── styles/
 │   └── global.css            # tema + token warna + animasi
 ├── assets/
@@ -132,12 +145,24 @@ src/
 └── content.config.ts
 
 scripts/
-└── gen-covers.cjs            # generate placeholder cover proyek
+└── gen-covers.cjs            # generate cover proyek
 ```
+
+### Kenapa `[...lang]`
+
+Satu file halaman melayani semua bahasa: rest-parameter `[...lang]` boleh kosong,
+jadi `index.astro` menghasilkan `/` (Indonesia, tanpa prefix) sekaligus `/en/`,
+`/ja/`, dan `/zh/`. Markup-nya ditulis sekali — tidak ada empat salinan file
+yang harus dijaga sinkron.
 
 ## Cara menambah proyek
 
-Buat file di `src/content/projects/`, mis. `proyek-baru.md`:
+Karena situs ini 4 bahasa, satu proyek = empat file Markdown dengan slug sama:
+`src/content/projects/proyek-baru.md` (Indonesia, wajib) plus versi terjemahannya
+di `en/`, `ja/`, dan `zh/`. Kalau salah satu bahasa belum ada, halaman proyek itu
+hanya muncul di bahasa yang filenya tersedia — jadi tidak akan ada halaman kosong.
+
+Isi Indonesia (default):
 
 ```markdown
 ---
@@ -154,7 +179,17 @@ status: "aktif"        # aktif | selesai | arsip
 Isi lengkap dalam Markdown...
 ```
 
-Halaman detail otomatis dibuat di `/projects/proyek-baru`.
+Halaman detail otomatis dibuat di `/projects/proyek-baru` (dan `/en/projects/...`,
+`/ja/projects/...`, `/zh/projects/...`).
+
+### Menambah bahasa baru
+
+1. Tambahkan kode bahasa di `languages` (`src/i18n/ui.ts`).
+2. Tambahkan kamusnya (`const xx: Dict = { ... }`) — TypeScript akan menolak
+   kalau ada kunci yang kurang, jadi tidak ada teks Indonesia yang bocor.
+3. Tambahkan folder `src/content/projects/xx/`.
+4. Selesai. Rute `/xx/...`, `hreflang`, pemilih bahasa, dan OG image mengikuti
+   otomatis karena semuanya diturunkan dari daftar bahasa itu.
 
 ## Status & yang tersisa
 
@@ -169,6 +204,8 @@ Sudah beres:
   diverifikasi lewat link repo di sampingnya.
 - **Cover proyek** digenerate `scripts/gen-covers.cjs` — kartu desain
   1200×630, bukan screenshot dan bukan placeholder.
+- **4 bahasa** dengan kamus terketik (`src/i18n/ui.ts`), rute ber-prefix,
+  `hreflang`, dan OG image per bahasa.
 
 Yang masih perlu bahan dari pemilik situs:
 
@@ -177,7 +214,15 @@ Yang masih perlu bahan dari pemilik situs:
    screenshot asli selalu lebih meyakinkan.
 2. **Angka hasil** per proyek (jumlah pengguna, waktu muat, ukuran data) —
    hanya kalau datanya benar-benar ada dan bisa dipertanggungjawabkan.
-3. `public/favicon.svg` kalau mau favicon sendiri.
+3. **Koreksi terjemahan Jepang & Cina oleh penutur asli.** Teks EN/JA/ZH ditulis
+   oleh asisten, bukan penutur asli. Untuk lamaran kerja ini penting: kalau
+   targetnya perusahaan Jepang atau Cina, mintakan orang yang fasih membacanya
+   sebelum link-nya dipakai. Kalau tidak ada yang bisa memeriksa, hapus saja
+   bahasa itu — satu bahasa sepuluh yang keliru lebih baik daripada empat bahasa
+   yang dua di antaranya salah.
+4. `public/favicon.svg` kalau mau favicon sendiri.
+5. Halaman 404 hanya berbahasa Indonesia (satu file `404.html` untuk semua URL).
+   Kalau perlu per bahasa, itu butuh routing 404 terpisah di Cloudflare Pages.
 
 ## Deploy
 

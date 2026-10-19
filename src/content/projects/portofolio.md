@@ -31,14 +31,16 @@ riwayat proyek ditampilkan sebagai `git log --graph`, dan 404 adalah output
   tautan yang dibagikan ke WhatsApp/LinkedIn tetap tampil rapi.
 - **Gambar proyek** diproses `astro:assets` menjadi WebP dengan `srcset` tiga ukuran.
 - **`prefers-reduced-motion` dihormati** di semua animasi.
+- **4 bahasa** (Indonesia, Inggris, Jepang, Cina) dengan URL sungguhan —
+  `/en/...`, `/ja/...`, `/zh/...` — plus tautan `hreflang` untuk mesin pencari.
 
 ## Angka build
 
 | Metrik | Nilai |
 | --- | --- |
-| Halaman | 8 |
+| Halaman | 49 |
 | Waktu build | ~1,4 detik |
-| HTML beranda (gzip) | ~10 KB |
+| HTML beranda (gzip) | ~13 KB |
 | CSS (gzip) | ~13 KB |
 | JavaScript di klien (gzip) | ~6 KB |
 

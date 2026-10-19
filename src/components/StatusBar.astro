@@ -3,7 +3,13 @@
  * StatusBar — bilah bawah bergaya status bar editor.
  */
 import { repo } from "../data/site";
+import { getLang, t, type Lang } from "../i18n/utils";
 
+interface Props {
+  lang?: Lang;
+}
+
+const lang = getLang(Astro.props.lang);
 const year = new Date().getFullYear();
 ---
 
@@ -24,11 +30,11 @@ const year = new Date().getFullYear();
 
     <span class="flex items-center gap-1.5">
       <span class="size-1.5 rounded-full bg-add" aria-hidden="true"></span>
-      {repo.status}
+      {t(lang, "status")}
     </span>
 
     <!-- jam live: repo berasa "hidup", update tiap 30 detik -->
-    <span class="hidden items-center gap-1.5 sm:flex" title="Waktu lokal pengunjung">
+    <span class="hidden items-center gap-1.5 sm:flex" title={t(lang, "localTime")}>
       <span aria-hidden="true">◷</span>
       <time data-live-clock>--:--</time>
     </span>
@@ -57,12 +63,8 @@ const year = new Date().getFullYear();
       setInterval(tickClock, 30_000);
     }
 
-    // --- label branch mengikuti halaman: "main" di home, nama file lain di sub-halaman ---
-    const branch = document.querySelector("[data-status-branch]");
-    if (branch) {
-      const seg = window.location.pathname.split("/").filter(Boolean)[0];
-      branch.textContent = seg ? `${seg}` : branch.textContent;
-    }
+    // --- label branch mengikuti halaman ditangani NavSync (satu tempat saja,
+    //     supaya logika path ber-prefix bahasa tidak terduplikasi) ---
   };
 
   document.addEventListener("astro:page-load", initStatusBar);

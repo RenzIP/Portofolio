@@ -2,8 +2,20 @@
 /**
  * branches.md — keahlian sebagai daftar branch.
  */
-import RepoLayout from "../layouts/RepoLayout.astro";
-import { branches } from "../data/site";
+import RepoLayout from "../../layouts/RepoLayout.astro";
+import { branches } from "../../data/site";
+import { getLang, locales, t, type Lang } from "../../i18n/utils";
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: undefined } },
+    ...locales
+      .filter((code) => code !== "id")
+      .map((code) => ({ params: { lang: code } })),
+  ];
+}
+
+const lang: Lang = getLang(Astro.params.lang);
 
 const toneMap: Record<string, { dot: string; text: string; border: string }> = {
   accent: { dot: "bg-accent-500", text: "text-accent-800", border: "border-accent-300" },
@@ -13,15 +25,14 @@ const toneMap: Record<string, { dot: string; text: string; border: string }> = {
 };
 ---
 
-<RepoLayout title="branches" file="branches.md">
+<RepoLayout title="branches" file="branches.md" lang={lang}>
   <header class="reveal mb-8">
     <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
       <span class="text-accent-500" aria-hidden="true">##</span>
       branches.md
     </h1>
     <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
-      Keahlian saya, dipetakan sebagai branch. Tiap branch mewakili satu area
-      kerja yang saya tekuni.
+      {t(lang, "branchesIntro")}
     </p>
   </header>
 
@@ -37,7 +48,7 @@ const toneMap: Record<string, { dot: string; text: string; border: string }> = {
               <span class:list={["size-2 rounded-full", tone.dot]} aria-hidden="true" />
               <code class:list={["text-sm font-medium", tone.text]}>{branch.name}</code>
               <span class="ml-auto text-xs text-ink-faint">
-                {branch.items.length} tech
+                {t(lang, "techCount", { n: branch.items.length })}
               </span>
             </div>
             <p class="mb-3 pl-4 text-sm leading-relaxed text-ink-soft">

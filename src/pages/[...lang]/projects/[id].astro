@@ -1,24 +1,44 @@
 ---
 /**
  * projects/[id] — isi satu file proyek.
+ *
+ * Satu route ini melayani semua bahasa: `/projects/gradi-ol`,
+ * `/en/projects/gradi-ol`, `/ja/...`, `/zh/...`. Entri konten bahasa lain
+ * punya id ber-prefix ("en/gradi-ol"), yang dipisah oleh `projectLang`
+ * dan `projectSlug`.
  */
 import { getCollection, render } from "astro:content";
 import { Image } from "astro:assets";
-import RepoLayout from "../../layouts/RepoLayout.astro";
+import RepoLayout from "../../../layouts/RepoLayout.astro";
+import {
+  getLang,
+  localizePath,
+  projectLang,
+  projectSlug,
+  t,
+  type Lang,
+} from "../../../i18n/utils";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
-  return projects.map((project) => ({
-    params: { id: project.id },
-    props: { project },
-  }));
+  return projects.map((project) => {
+    const lang = projectLang(project.id);
+    return {
+      params: {
+        lang: lang === "id" ? undefined : lang,
+        id: projectSlug(project.id),
+      },
+      props: { project },
+    };
+  });
 }
 
 const { project } = Astro.props;
+const lang: Lang = getLang(Astro.params.lang as string | undefined);
 const { title, summary, tags, date, repo, demo, status, cover } = project.data;
 const { Content } = await render(project);
 
-const formattedDate = date.toLocaleDateString("id-ID", {
+const formattedDate = date.toLocaleDateString(lang === "id" ? "id-ID" : lang, {
   year: "numeric",
   month: "long",
   day: "numeric",
@@ -28,6 +48,12 @@ const statusTone: Record<string, string> = {
   aktif: "border-add/40 bg-add-bg text-add",
   selesai: "border-rule-strong bg-paper-soft text-ink-soft",
   arsip: "border-rule-strong bg-paper-soft text-ink-faint",
+};
+
+const statusLabel: Record<string, "projActive" | "projDone" | "projArchived"> = {
+  aktif: "projActive",
+  selesai: "projDone",
+  arsip: "projArchived",
 };
 
 // Structured data khusus proyek: SoftwareSourceCode + CreativeWork.
@@ -49,14 +75,15 @@ const projectSchema = {
 <RepoLayout
   title={title}
   description={summary}
-  file={`projects/${project.id}.md`}
+  file={`projects/${projectSlug(project.id)}.md`}
   schemaExtra={projectSchema}
+  lang={lang}
 >
   <a
-    href="/projects"
+    href={localizePath("/projects", lang)}
     class="mb-6 inline-block text-xs text-ink-faint transition-colors hover:text-accent-700"
   >
-    ← projects/
+    {t(lang, "projBack")}
   </a>
 
   <article>
@@ -97,7 +124,7 @@ const projectSchema = {
                 statusTone[status] ?? statusTone.selesai,
               ]}
             >
-              {status}
+              {t(lang, statusLabel[status] ?? "projDone")}
             </span>
           )
         }
@@ -118,7 +145,7 @@ const projectSchema = {
                 rel="noopener noreferrer"
                 class="rounded-md border border-rule-strong px-3 py-1.5 text-xs font-medium text-ink-soft transition-colors hover:border-accent-400 hover:text-accent-700"
               >
-                source ↗
+                {t(lang, "projSource")}
               </a>
             )}
             {demo && (
@@ -128,7 +155,7 @@ const projectSchema = {
                 rel="noopener noreferrer"
                 class="rounded-md bg-ink px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-accent-700"
               >
-                live ↗
+                {t(lang, "projLive")}
               </a>
             )}
           </div>

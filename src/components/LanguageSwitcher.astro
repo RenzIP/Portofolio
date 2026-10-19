@@ -1,0 +1,46 @@
+---
+/**
+ * LanguageSwitcher — pemilih bahasa.
+ *
+ * Link-nya nyata (bukan tombol JS): tiap bahasa punya URL sendiri, jadi
+ * bisa dibuka di tab baru, di-bookmark, dan dirayapi mesin pencari.
+ */
+import { shortLabels, languages, locales } from "../i18n/ui";
+import { switchLocaleUrl, t, type Lang } from "../i18n/utils";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const pathname = Astro.url.pathname;
+---
+
+<nav aria-label={t(lang, "langAria")} class="flex items-center">
+  <ul class="flex items-center gap-px rounded-sm border border-rule bg-paper">
+    {
+      locales.map((code) => {
+        const active = code === lang;
+        return (
+          <li>
+            <a
+              href={switchLocaleUrl(pathname, code)}
+              hreflang={code}
+              lang={code}
+              aria-current={active ? "true" : undefined}
+              title={languages[code]}
+              class:list={[
+                "block px-1.5 py-1 text-[0.62rem] leading-none transition-colors",
+                active
+                  ? "bg-ink font-medium text-paper"
+                  : "text-ink-faint hover:bg-paper-soft hover:text-ink",
+              ]}
+            >
+              {shortLabels[code]}
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</nav>

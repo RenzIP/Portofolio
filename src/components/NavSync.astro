@@ -8,6 +8,11 @@
  *
  * Solusi: tiap `astro:page-load`, hitung ulang dari `location.pathname`
  * dan update DOM yang persisten.
+ *
+ * Catatan i18n: URL halaman punya prefix bahasa ("/en/log"), sedangkan
+ * tautan navigasi menyimpan path kanonik di `data-nav-path`. Jadi path
+ * dari `location` dinormalkan dulu (prefix bahasa dibuang) sebelum
+ * dibandingkan — kalau tidak, "/en/log" tidak akan pernah cocok dengan "/log".
  */
 ---
 
@@ -24,6 +29,18 @@
   const IDLE_MOBILE =
     "border-rule text-ink-soft hover:border-rule-strong hover:text-ink";
 
+  // Daftar prefix bahasa diambil dari <html data-locale-prefixes="en ja zh">,
+  // jadi menambah bahasa baru tidak perlu menyentuh file ini.
+  const prefixes = (document.documentElement.dataset.localePrefixes ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const canonicalPath = (pathname) => {
+    const segs = pathname.split("/").filter(Boolean);
+    if (segs.length && prefixes.includes(segs[0])) segs.shift();
+    return segs.length ? "/" + segs.join("/") : "/";
+  };
+
   const setClasses = (el, active) => {
     const inFileTree = !!el.closest("[data-file-tree]");
     const on = (inFileTree ? ACTIVE_FILE : ACTIVE_MOBILE).split(" ");
@@ -37,35 +54,36 @@
     }
   };
 
-  const isActivePath = (linkPath, current) =>
-    linkPath === "/" ? current === "/" : current.startsWith(linkPath);
+  const isActivePath = (navPath, current) =>
+    navPath === "/" ? current === "/" : current.startsWith(navPath);
 
-  const fileLabel = (pathname) => {
-    if (pathname === "/") return "README.md";
-    if (pathname === "/projects") return "projects/";
-    if (pathname.startsWith("/projects/")) {
-      const slug = pathname.split("/").filter(Boolean).pop() ?? "";
+  const fileLabel = (canonical) => {
+    if (canonical === "/") return "README.md";
+    if (canonical === "/projects") return "projects/";
+    if (canonical.startsWith("/projects/")) {
+      const slug = canonical.split("/").filter(Boolean).pop() ?? "";
       return `projects/${slug}.md`;
     }
-    return pathname.replace(/^\//, "") + ".md";
+    return canonical.replace(/^\//, "") + ".md";
   };
 
   const syncNav = () => {
-    // Normalisasi: trailing slash dihapus ("/log/" -> "/log"), root tetap "/".
-    const raw = window.location.pathname;
-    const current = raw.length > 1 ? raw.replace(/\/$/, "") : raw;
+    const current = canonicalPath(window.location.pathname);
+
     // Semua link nav (FileTree persist + MobileNav yang di-swap).
-    document.querySelectorAll("a[data-nav-link]").forEach((a) => {
-      const linkPath = a.getAttribute("data-nav-link") ?? "";
-      setClasses(a, isActivePath(linkPath, current));
+    document.querySelectorAll("a[data-nav-path]").forEach((a) => {
+      const navPath = a.getAttribute("data-nav-path") ?? "";
+      setClasses(a, isActivePath(navPath, current));
     });
+
     // Breadcrumb di TopBar (persist).
     const crumb = document.querySelector("[data-path-label]");
-    if (crumb) crumb.textContent = fileLabel(window.location.pathname);
-    // Label branch di status bar mengikuti segmen pertama path.
+    if (crumb) crumb.textContent = fileLabel(current);
+
+    // Label branch di status bar mengikuti segmen pertama path kanonik.
     const branch = document.querySelector("[data-status-branch]");
     if (branch) {
-      const seg = window.location.pathname.split("/").filter(Boolean)[0];
+      const seg = current.split("/").filter(Boolean)[0];
       branch.textContent = seg ?? branch.textContent;
     }
   };

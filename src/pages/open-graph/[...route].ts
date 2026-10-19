@@ -7,6 +7,8 @@
 import { OGImageRoute } from "astro-og-canvas";
 import { getCollection } from "astro:content";
 import { repo } from "../../data/site";
+import { locales } from "../../i18n/ui";
+import { ogPrefix, projectLang, projectSlug, t } from "../../i18n/utils";
 
 /* ---------- warna (RGB), diselaraskan dengan tema situs ---------- */
 const PAPER: [number, number, number] = [251, 251, 250]; // #fbfbfa
@@ -20,35 +22,42 @@ const FONTS = [
   "./src/og-fonts/space-grotesk.ttf",
 ];
 
-/* ---------- halaman statis ---------- */
-const staticPages: Record<string, { title: string; description: string }> = {
-  home: {
-    title: `${repo.owner} — Full-Stack Web Developer`,
-    description: repo.tagline,
-  },
-  projects: {
-    title: "projects/",
-    description: "Kumpulan proyek yang pernah saya kerjakan.",
-  },
-  log: {
-    title: "log.md",
-    description: "Riwayat perjalanan saya sebagai developer.",
-  },
-  branches: {
-    title: "branches.md",
-    description: "Keahlian saya, dipetakan sebagai branch.",
-  },
-  contact: {
-    title: "CONTACT.md",
-    description: "Cara menghubungi saya untuk kolaborasi atau peluang kerja.",
-  },
-};
+/* ---------- halaman statis, per bahasa ---------- */
+// Kunci TIDAK boleh mengandung "/" — itu yang membuat folder sampah
+// seperti /open-graph/project-en/gradi-ol.png sebelum perbaikan.
+const staticPages = Object.fromEntries(
+  locales.flatMap((lang) => {
+    const p = ogPrefix(lang);
+    return [
+      [
+        `${p}home`,
+        {
+          title: `${repo.author} — ${t(lang, "ogJobTitle")}`,
+          description: t(lang, "tagline"),
+        },
+      ],
+      [
+        `${p}projects`,
+        { title: "projects/", description: t(lang, "ogProjectsDesc") },
+      ],
+      [`${p}log`, { title: "log.md", description: t(lang, "ogLogDesc") }],
+      [
+        `${p}branches`,
+        { title: "branches.md", description: t(lang, "ogBranchesDesc") },
+      ],
+      [
+        `${p}contact`,
+        { title: "CONTACT.md", description: t(lang, "ogContactDesc") },
+      ],
+    ];
+  }),
+);
 
-/* ---------- proyek dari content collection ---------- */
+/* ---------- proyek dari content collection, per bahasa ---------- */
 const projects = await getCollection("projects");
 const projectPages = Object.fromEntries(
   projects.map((p) => [
-    `project-${p.id}`,
+    `${ogPrefix(projectLang(p.id))}project-${projectSlug(p.id)}`,
     { title: p.data.title, description: p.data.summary },
   ]),
 );

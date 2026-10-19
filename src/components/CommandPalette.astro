@@ -4,12 +4,19 @@
  * Vanilla JS, tanpa framework. Ringan dan bisa diakses keyboard.
  */
 import { fileTree, socials } from "../data/site";
+import { getLang, localizePath, navHintKey, t, type Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const lang = getLang(Astro.props.lang);
 
 const fileCommands = fileTree.flatMap((group) =>
   group.files.map((f) => ({
     label: f.label,
-    hint: f.hint,
-    href: f.path,
+    hint: t(lang, navHintKey[f.path] ?? "navHome"),
+    href: localizePath(f.path, lang),
     kind: "file" as const,
     external: false,
   })),
@@ -31,7 +38,7 @@ const commands = [...fileCommands, ...externalCommands];
   class="fixed inset-0 z-50 hidden items-start justify-center pt-[12vh]"
   role="dialog"
   aria-modal="true"
-  aria-label="Palet perintah"
+  aria-label={t(lang, "cmdkAria")}
 >
   <!-- backdrop -->
   <div
@@ -51,7 +58,7 @@ const commands = [...fileCommands, ...externalCommands];
         type="text"
         autocomplete="off"
         spellcheck="false"
-        placeholder="Ketik untuk mencari…"
+        placeholder={t(lang, "cmdkPlaceholder")}
         class="w-full bg-transparent py-3 text-sm text-ink outline-none placeholder:text-ink-faint"
         aria-controls="cmdk-list"
         aria-autocomplete="list"
@@ -69,7 +76,7 @@ const commands = [...fileCommands, ...externalCommands];
       id="cmdk-list"
       class="thin-scroll max-h-72 overflow-y-auto py-1"
       role="listbox"
-      aria-label="Hasil pencarian"
+      aria-label={t(lang, "cmdkResultsAria")}
     >
       {
         commands.map((cmd, i) => (
@@ -98,7 +105,7 @@ const commands = [...fileCommands, ...externalCommands];
         id="cmdk-empty"
         class="hidden px-3 py-6 text-center text-sm text-ink-faint"
       >
-        Tidak ada hasil.
+        {t(lang, "cmdkEmpty")}
       </li>
     </ul>
 
@@ -108,11 +115,11 @@ const commands = [...fileCommands, ...externalCommands];
       <span class="flex items-center gap-1">
         <kbd class="rounded-xs border border-rule px-1 py-px">↑</kbd>
         <kbd class="rounded-xs border border-rule px-1 py-px">↓</kbd>
-        pilih
+        {t(lang, "cmdkSelect")}
       </span>
       <span class="flex items-center gap-1">
         <kbd class="rounded-xs border border-rule px-1 py-px">↵</kbd>
-        buka
+        {t(lang, "cmdkOpen")}
       </span>
     </div>
   </div>

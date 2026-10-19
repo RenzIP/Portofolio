@@ -2,14 +2,27 @@
 /**
  * CONTACT.md — kontak sebagai file markdown.
  */
-import RepoLayout from "../layouts/RepoLayout.astro";
-import { repo, socials } from "../data/site";
+import RepoLayout from "../../layouts/RepoLayout.astro";
+import { repo, socials } from "../../data/site";
+import { getLang, locales, t, type Lang } from "../../i18n/utils";
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: undefined } },
+    ...locales
+      .filter((code) => code !== "id")
+      .map((code) => ({ params: { lang: code } })),
+  ];
+}
+
+const lang: Lang = getLang(Astro.params.lang);
 ---
 
 <RepoLayout
   title="CONTACT"
   file="CONTACT.md"
-  description="Cara menghubungi saya untuk kolaborasi atau peluang kerja."
+  description={t(lang, "contactIntro")}
+  lang={lang}
 >
   <header class="reveal mb-8">
     <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
@@ -17,8 +30,7 @@ import { repo, socials } from "../data/site";
       CONTACT.md
     </h1>
     <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
-      Punya proyek, pertanyaan, atau ingin berkolaborasi? Saya senang mendengarnya.
-      Cara tercepat adalah lewat email.
+      {t(lang, "contactIntro")}
     </p>
   </header>
 
@@ -36,9 +48,13 @@ import { repo, socials } from "../data/site";
         id="copy-email"
         type="button"
         data-email={repo.email}
+        data-label={t(lang, "copyLabel")}
+        data-label-copied={t(lang, "copiedLabel")}
+        data-label-failed={t(lang, "copyFailed")}
+        aria-label={t(lang, "copyAria")}
         class="rounded-sm border border-rule-strong px-2.5 py-1 text-xs text-ink-soft transition-colors hover:border-accent-400 hover:text-accent-700"
       >
-        <span id="copy-email-label">salin</span>
+        <span id="copy-email-label">{t(lang, "copyLabel")}</span>
       </button>
     </div>
   </section>
@@ -69,22 +85,22 @@ import { repo, socials } from "../data/site";
   </section>
 
   <section class="code-block p-5" data-reveal>
-    <p class="meta-label mb-3">// preferensi kerja</p>
+    <p class="meta-label mb-3">{t(lang, "contactPrefLabel")}</p>
     <dl class="space-y-2 text-sm">
       <div class="flex gap-4">
-        <dt class="w-24 shrink-0 text-ink-faint">lokasi</dt>
+        <dt class="w-24 shrink-0 text-ink-faint">{t(lang, "contactLocation")}</dt>
         <dd class="text-ink-soft">{repo.location}</dd>
       </div>
       <div class="flex gap-4">
-        <dt class="w-24 shrink-0 text-ink-faint">status</dt>
+        <dt class="w-24 shrink-0 text-ink-faint">{t(lang, "contactStatus")}</dt>
         <dd class="flex items-center gap-1.5 text-ink-soft">
           <span class="size-1.5 rounded-full bg-add" aria-hidden="true"></span>
-          {repo.status}
+          {t(lang, "status")}
         </dd>
       </div>
       <div class="flex gap-4">
-        <dt class="w-24 shrink-0 text-ink-faint">fokus</dt>
-        <dd class="text-ink-soft">Web full-stack · antarmuka &amp; API</dd>
+        <dt class="w-24 shrink-0 text-ink-faint">{t(lang, "contactFocus")}</dt>
+        <dd class="text-ink-soft">{t(lang, "contactFocusValue")}</dd>
       </div>
     </dl>
   </section>
@@ -97,16 +113,22 @@ import { repo, socials } from "../data/site";
     if (!btn || !label || btn.dataset.bound === "1") return;
     btn.dataset.bound = "1";
 
+    // Label tombol ikut bahasa halaman, dikirim lewat data-attribute
+    // supaya tidak ada teks Indonesia yang bocor ke halaman bahasa lain.
+    const defaultLabel = btn.dataset.label ?? label.textContent ?? "";
+    const copiedLabel = btn.dataset.labelCopied ?? defaultLabel;
+    const failedLabel = btn.dataset.labelFailed ?? defaultLabel;
+
     btn.addEventListener("click", async () => {
       const email = btn.getAttribute("data-email");
       if (!email) return;
       try {
         await navigator.clipboard.writeText(email);
-        label.textContent = "tersalin ✓";
+        label.textContent = copiedLabel;
       } catch {
-        label.textContent = "gagal";
+        label.textContent = failedLabel;
       }
-      setTimeout(() => (label.textContent = "salin"), 1800);
+      setTimeout(() => (label.textContent = defaultLabel), 1800);
     });
   };
 
