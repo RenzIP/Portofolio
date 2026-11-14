@@ -246,7 +246,7 @@ const jsonLd = {
   </head>
 
   <body class="flex min-h-screen flex-col bg-paper">
-    <BootScreen />
+    <BootScreen lang={lang} />
     <ScrollProgress />
 
     <a
@@ -256,11 +256,21 @@ const jsonLd = {
       {t(lang, "skipToContent")}
     </a>
 
-    <TopBar lang={lang} transition:persist="site-topbar" />
+    <!-- TopBar sengaja TIDAK di-persist: isinya bergantung halaman
+         (breadcrumb + tautan pemilih bahasa yang menunjuk halaman saat ini).
+         Kalau di-persist, tautan bahasa ikut "tertinggal" di halaman pertama.
+         Re-render tiap navigasi lebih murah daripada harus menyinkronkan
+         seluruh isi header lewat JS. -->
+    <TopBar lang={lang} />
 
     <div class="mx-auto flex w-full max-w-6xl flex-1 gap-8 px-4 py-8">
-      <!-- Sidebar: file tree (sembunyi di layar kecil) -->
-      <aside class="hidden w-52 shrink-0 md:block" transition:persist="site-sidebar">
+      <!-- Sidebar: file tree (sembunyi di layar kecil).
+           Key persist menyertakan bahasa supaya tautan & tooltip tidak
+           tertinggal di bahasa sebelumnya saat pengunjung berganti bahasa. -->
+      <aside
+        class="hidden w-52 shrink-0 md:block"
+        transition:persist={`site-sidebar-${lang}`}
+      >
         <div class="sticky top-20">
           <FileTree lang={lang} />
         </div>
@@ -311,7 +321,7 @@ const jsonLd = {
         >
           <span class="text-accent-600" aria-hidden="true">◆</span>
           <span class="font-medium text-ink">{file}</span>
-          <span class="ml-auto hidden sm:inline">read-only</span>
+          <span class="ml-auto hidden sm:inline">{t(lang, "readOnly")}</span>
         </div>
 
         <slot />
@@ -321,7 +331,7 @@ const jsonLd = {
     <StatusBar lang={lang} />
 
     <CommandPalette lang={lang} />
-    <GitTerminal />
+    <GitTerminal lang={lang} />
     <NavSync />
     <ScrollReveal />
   </body>

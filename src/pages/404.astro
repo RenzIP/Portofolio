@@ -3,6 +3,10 @@
  * 404 — error gaya git.
  */
 import RepoLayout from "../layouts/RepoLayout.astro";
+import { t } from "../i18n/utils";
+
+// Satu 404.html melayani semua URL, jadi bahasanya tetap Indonesia.
+const lang = "id" as const;
 ---
 
 <RepoLayout title="404" file="404.md" noindex>
@@ -23,13 +27,13 @@ import RepoLayout from "../layouts/RepoLayout.astro";
           error: pathspec 'halaman-ini' did not match any file(s) known to git
         </p>
         <p class="mb-6 text-sm text-ink-soft">
-          Halaman yang Anda tuju tidak ada di repository ini.
+          {t(lang, "p404Body")}
         </p>
         <a
           href="/"
           class="pressable inline-block rounded-md bg-ink px-4 py-2 text-xs font-medium text-paper hover:bg-accent-700"
         >
-          ← kembali ke README.md
+          {t(lang, "p404Back")}
         </a>
       </div>
     </div>

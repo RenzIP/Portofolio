@@ -100,7 +100,7 @@ const projectSchema = {
           <div class="mb-5 overflow-hidden rounded-md border border-rule">
             <Image
               src={cover}
-              alt={`Tangkapan layar proyek ${title}`}
+              alt={t(lang, "projImageAlt", { title })}
               widths={[600, 900, 1200]}
               sizes="(max-width: 1024px) 100vw, 900px"
               loading="eager"

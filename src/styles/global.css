@@ -8,54 +8,80 @@
   --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo,
     monospace;
   --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-mono);
+  --font-sans: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
 
-  /* --- Base: kertas & tinta (light editor) --- */
-  --color-paper: #fbfbfa;
-  --color-paper-soft: #f5f5f3;
-  --color-paper-sunk: #efefec;
-  --color-ink: #1a1a1a;
-  --color-ink-soft: #44443f;
-  --color-ink-faint: #6b6b64;
-  --color-rule: #e2e2dd;
-  --color-rule-strong: #c4c4bb;
+  /* --- Base Surfaces: Crisp Modern Palette --- */
+  --color-paper: #ffffff;
+  --color-paper-soft: #f8faf9;
+  --color-paper-sunk: #eef2f0;
+  --color-ink: #111816;
+  --color-ink-soft: #2e3e39;
+  --color-ink-faint: #5d726b;
+  --color-rule: #e2e8e5;
+  --color-rule-strong: #c5d3ce;
 
-  /* --- Aksen utama: amber (sengaja beda dari GitHub hijau/biru) --- */
-  --color-accent-50: #fffbeb;
-  --color-accent-100: #fef3c7;
-  --color-accent-200: #fde68a;
-  --color-accent-300: #fcd34d;
-  --color-accent-400: #fbbf24;
-  --color-accent-500: #f59e0b;
-  --color-accent-600: #d97706;
-  --color-accent-700: #b45309;
-  --color-accent-800: #92400e;
-  --color-accent-900: #78350f;
+  /* --- MAIN ACCENT: Marigold #E7B94C --- */
+  --color-accent-50: #fefcf3;
+  --color-accent-100: #fcf7e2;
+  --color-accent-200: #f8ecc4;
+  --color-accent-300: #f2dda0;
+  --color-accent-400: #eecb73;
+  --color-accent-500: #e7b94c;
+  --color-accent-600: #cf9b2b;
+  --color-accent-700: #a7781b;
+  --color-accent-800: #7b5619;
+  --color-accent-900: #553b15;
 
-  /* --- Aksen sekunder: violet (untuk branch, link, tag) --- */
-  --color-violet-50: #f5f3ff;
-  --color-violet-100: #ede9fe;
-  --color-violet-200: #ddd6fe;
-  --color-violet-300: #c4b5fd;
-  --color-violet-400: #a78bfa;
-  --color-violet-500: #8b5cf6;
-  --color-violet-600: #7c3aed;
-  --color-violet-700: #6d28d9;
-  --color-violet-800: #5b21b6;
-  --color-violet-900: #4c1d95;
+  /* --- SECONDARY: Verdigris Green #365B52 --- */
+  --color-verdigris-50: #f2f7f5;
+  --color-verdigris-100: #e1ede8;
+  --color-verdigris-200: #c1dad0;
+  --color-verdigris-300: #98bfb3;
+  --color-verdigris-400: #689d8f;
+  --color-verdigris-500: #365b52;
+  --color-verdigris-600: #2b4942;
+  --color-verdigris-700: #233b35;
+  --color-verdigris-800: #1b2e29;
+  --color-verdigris-900: #14221f;
+
+  /* --- ACCENT HIGHLIGHT: Raspberry Rose #D75C75 --- */
+  --color-rose-50: #fdf3f5;
+  --color-rose-100: #fce6ea;
+  --color-rose-200: #f8cbd4;
+  --color-rose-300: #f2a3b4;
+  --color-rose-400: #e77790;
+  --color-rose-500: #d75c75;
+  --color-rose-600: #bf3f5a;
+  --color-rose-700: #a02e45;
+  --color-rose-800: #85293c;
+  --color-rose-900: #702636;
+
+  /* Violet mapping to verdigris & rose for branch distinction */
+  --color-violet-50: var(--color-verdigris-50);
+  --color-violet-100: var(--color-verdigris-100);
+  --color-violet-200: var(--color-verdigris-200);
+  --color-violet-300: var(--color-verdigris-300);
+  --color-violet-400: var(--color-verdigris-400);
+  --color-violet-500: var(--color-verdigris-500);
+  --color-violet-600: var(--color-verdigris-600);
+  --color-violet-700: var(--color-verdigris-700);
+  --color-violet-800: var(--color-verdigris-800);
+  --color-violet-900: var(--color-verdigris-900);
 
   /* --- Token diff (git add / git rm) --- */
-  --color-add: #1a7f37;
-  --color-add-bg: #e6f4ea;
-  --color-del: #cf222e;
-  --color-del-bg: #fbe9eb;
+  --color-add: #233b35;
+  --color-add-bg: #e1ede8;
+  --color-del: #a02e45;
+  --color-del-bg: #fce6ea;
 
-  /* --- Radius kecil: terasa seperti UI editor, bukan kartu web --- */
-  --radius-xs: 2px;
-  --radius-sm: 3px;
-  --radius-md: 4px;
+  /* --- Radius & Shadows: refined studio precision --- */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 
-  --shadow-lift: 0 1px 2px rgb(26 26 26 / 0.06), 0 4px 12px rgb(26 26 26 / 0.04);
+  --shadow-lift: 0 2px 4px rgb(54 91 82 / 0.04), 0 8px 24px rgb(54 91 82 / 0.08);
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.03), 0 4px 12px rgb(0 0 0 / 0.03);
 }
 
 @layer base {
@@ -64,7 +90,15 @@
   }
 
   body {
-    @apply bg-paper font-mono text-ink antialiased;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-image: 
+      radial-gradient(circle at 1px 1px, rgba(54, 91, 82, 0.07) 1px, transparent 0);
+    background-size: 24px 24px;
+    background-attachment: fixed;
     font-variant-ligatures: none;
   }
 
@@ -107,6 +141,7 @@
     background: var(--color-paper-soft);
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
   }
 
   /* --- Label kecil bergaya metadata (uppercase, tracking lebar) --- */
@@ -114,22 +149,28 @@
     font-size: 0.6875rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-ink-faint);
+    color: var(--color-verdigris-500);
+    font-weight: 600;
   }
 
   /* --- Chip / tag --- */
   .chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    border: 1px solid var(--color-rule-strong);
+    gap: 0.35rem;
+    border: 1px solid var(--color-rule);
     border-radius: var(--radius-sm);
     background: var(--color-paper);
-    padding: 0.15rem 0.45rem;
+    padding: 0.2rem 0.55rem;
     font-size: 0.72rem;
-    line-height: 1.5;
+    line-height: 1.4;
     color: var(--color-ink-soft);
     white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .chip:hover {
+    border-color: var(--color-accent-400);
+    color: var(--color-ink);
   }
 
   /* --- Baris diff: penanda + / - --- */

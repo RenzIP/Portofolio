@@ -116,6 +116,15 @@ const id = {
   localTime: "Waktu lokal pengunjung",
   skipToContent: "Lompat ke konten",
 
+  // Teks lintas komponen (commit graph, terminal, boot screen, alt gambar).
+  hashCopyTitle: "Salin hash {hash}",
+  projImageAlt: "Tangkapan layar proyek {title}",
+  bootLoading: "Memuat situs",
+  termAria: "Terminal git (easter egg)",
+  termClose: "Tutup terminal",
+  termWaiting: "Menunggu perintah…",
+  termHint: "easter egg · ditemukan via Konami code ↑↑↓↓←→←→BA",
+
   ogJobTitle: "Full-Stack Web Developer",
   ogProjectsDesc: "Kumpulan proyek yang pernah saya kerjakan.",
   ogLogDesc: "Riwayat proyek, ditampilkan sebagai commit log.",
@@ -201,6 +210,15 @@ const en: Dict = {
   localTime: "Visitor's local time",
   skipToContent: "Skip to content",
 
+  // Cross-component strings (commit graph, terminal, boot screen, image alt).
+  hashCopyTitle: "Copy hash {hash}",
+  projImageAlt: "Screenshot of the {title} project",
+  bootLoading: "Loading site",
+  termAria: "Git terminal (easter egg)",
+  termClose: "Close terminal",
+  termWaiting: "Waiting for your command…",
+  termHint: "easter egg · found via the Konami code ↑↑↓↓←→←→BA",
+
   ogJobTitle: "Full-Stack Web Developer",
   ogProjectsDesc: "The projects I have built.",
   ogLogDesc: "Project history, shown as a commit log.",
@@ -283,6 +301,15 @@ const ja: Dict = {
   localTime: "閲覧者の現地時刻",
   skipToContent: "本文へスキップ",
 
+  // コンポーネント共通のテキスト（コミットグラフ、ターミナル、起動画面、画像の代替テキスト）。
+  hashCopyTitle: "ハッシュ {hash} をコピー",
+  projImageAlt: "プロジェクト「{title}」のスクリーンショット",
+  bootLoading: "サイトを読み込み中",
+  termAria: "Git ターミナル（イースターエッグ）",
+  termClose: "ターミナルを閉じる",
+  termWaiting: "コマンドを待っています…",
+  termHint: "イースターエッグ · コナミコマンド ↑↑↓↓←→←→BA で発見",
+
   ogJobTitle: "フルスタック Web 開発者",
   ogProjectsDesc: "これまでに作ったプロジェクトの一覧。",
   ogLogDesc: "プロジェクトの履歴をコミットログとして表示。",
@@ -361,6 +388,15 @@ const zh: Dict = {
 
   localTime: "访问者的本地时间",
   skipToContent: "跳到正文",
+
+  // 组件通用文案（提交图、终端、启动画面、图片替代文本）。
+  hashCopyTitle: "复制哈希 {hash}",
+  projImageAlt: "{title} 项目的截图",
+  bootLoading: "正在加载网站",
+  termAria: "Git 终端（彩蛋）",
+  termClose: "关闭终端",
+  termWaiting: "等待命令…",
+  termHint: "彩蛋 · 通过科乐美秘技 ↑↑↓↓←→←→BA 发现",
 
   ogJobTitle: "全栈 Web 开发者",
   ogProjectsDesc: "我做过的项目合集。",

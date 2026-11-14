@@ -3,8 +3,17 @@
  * CommandPalette — palet perintah (Ctrl+K / Cmd+K) untuk navigasi cepat.
  * Vanilla JS, tanpa framework. Ringan dan bisa diakses keyboard.
  */
+import { getCollection } from "astro:content";
 import { fileTree, socials } from "../data/site";
-import { getLang, localizePath, navHintKey, t, type Lang } from "../i18n/utils";
+import {
+  getLang,
+  localizePath,
+  navHintKey,
+  projectLang,
+  projectSlug,
+  t,
+  type Lang,
+} from "../i18n/utils";
 
 interface Props {
   lang?: Lang;
@@ -12,25 +21,52 @@ interface Props {
 
 const lang = getLang(Astro.props.lang);
 
-const fileCommands = fileTree.flatMap((group) =>
-  group.files.map((f) => ({
-    label: f.label,
-    hint: t(lang, navHintKey[f.path] ?? "navHome"),
-    href: localizePath(f.path, lang),
-    kind: "file" as const,
-    external: false,
-  })),
+/** Kata kunci pencarian: judul + hint + slug/tag, semuanya huruf kecil. */
+const searchKey = (...parts: string[]) => parts.join(" ").toLowerCase();
+
+const pageCommands = fileTree.flatMap((group) =>
+  group.files.map((f) => {
+    const hint = t(lang, navHintKey[f.path] ?? "navHome");
+    return {
+      label: f.label,
+      hint,
+      href: localizePath(f.path, lang),
+      kind: "file" as const,
+      external: false,
+      search: searchKey(f.label, hint),
+    };
+  }),
 );
 
-const externalCommands = socials.map((s) => ({
+// Proyek ikut bisa dicari dari palet — pengunjung biasanya mencari nama
+// proyek, bukan nama file. Hanya entri bahasa halaman ini yang ditampilkan.
+const projectCommands = (await getCollection("projects"))
+  .filter((p) => projectLang(p.id) === lang)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .map((p) => ({
+    label: p.data.title,
+    hint: p.data.tags.slice(0, 3).join(" · "),
+    href: localizePath(`/projects/${projectSlug(p.id)}`, lang),
+    kind: "project" as const,
+    external: false,
+    search: searchKey(p.data.title, projectSlug(p.id), ...p.data.tags),
+  }));
+
+const linkCommands = socials.map((s) => ({
   label: s.label,
   hint: s.handle,
   href: s.href,
   kind: "link" as const,
   external: true,
+  search: searchKey(s.label, s.handle),
 }));
 
-const commands = [...fileCommands, ...externalCommands];
+const sections = [
+  { key: "pages", label: t(lang, "cmdkPages"), commands: pageCommands },
+  { key: "projects", label: t(lang, "cmdkProjects"), commands: projectCommands },
+  // Tautan eksternal tidak perlu judul grup; ikon ↗ sudah membedakannya.
+  { key: "links", label: undefined, commands: linkCommands },
+];
 ---
 
 <div
@@ -79,25 +115,42 @@ const commands = [...fileCommands, ...externalCommands];
       aria-label={t(lang, "cmdkResultsAria")}
     >
       {
-        commands.map((cmd, i) => (
-          <li role="option" aria-selected={i === 0 ? "true" : "false"}>
-            <a
-              href={cmd.href}
-              target={cmd.external ? "_blank" : undefined}
-              rel={cmd.external ? "noopener noreferrer" : undefined}
-              data-cmdk-item
-              data-index={i}
-              data-label={cmd.label.toLowerCase()}
-              class="flex items-center gap-3 px-3 py-2 text-sm text-ink-soft data-[active=true]:bg-accent-50 data-[active=true]:text-accent-800"
-            >
-              <span class="shrink-0 text-xs text-ink-faint" aria-hidden="true">
-                {cmd.kind === "file" ? "·" : "↗"}
-              </span>
-              <span class="font-medium">{cmd.label}</span>
-              <span class="ml-auto truncate text-xs text-ink-faint">
-                {cmd.hint}
-              </span>
-            </a>
+        sections.map((section) => (
+          <li role="group" aria-label={section.label} data-cmdk-group={section.key}>
+            {section.label && (
+              <p class="meta-label px-3 pt-2 pb-1 text-[0.62rem]">
+                {section.label}
+              </p>
+            )}
+            <ul role="none">
+              {section.commands.map((cmd) => (
+                <li role="option" aria-selected="false">
+                  <a
+                    href={cmd.href}
+                    target={cmd.external ? "_blank" : undefined}
+                    rel={cmd.external ? "noopener noreferrer" : undefined}
+                    data-cmdk-item
+                    data-label={cmd.search}
+                    class="flex items-center gap-3 px-3 py-2 text-sm text-ink-soft data-[active=true]:bg-accent-50 data-[active=true]:text-accent-800"
+                  >
+                    <span
+                      class="shrink-0 text-xs text-ink-faint"
+                      aria-hidden="true"
+                    >
+                      {cmd.kind === "file"
+                        ? "·"
+                        : cmd.kind === "project"
+                          ? "▸"
+                          : "↗"}
+                    </span>
+                    <span class="truncate font-medium">{cmd.label}</span>
+                    <span class="ml-auto truncate text-xs text-ink-faint">
+                      {cmd.hint}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </li>
         ))
       }
@@ -145,6 +198,9 @@ const commands = [...fileCommands, ...externalCommands];
     const allItems = Array.from(
       list.querySelectorAll<HTMLAnchorElement>("[data-cmdk-item]"),
     );
+    const groups = Array.from(
+      list.querySelectorAll<HTMLElement>("[data-cmdk-group]"),
+    );
     let visible: HTMLAnchorElement[] = [...allItems];
     let activeIndex = 0;
 
@@ -166,6 +222,13 @@ const commands = [...fileCommands, ...externalCommands];
         const match = q === "" || (el.dataset.label ?? "").includes(q);
         el.parentElement!.classList.toggle("hidden", !match);
         if (match) visible.push(el);
+      });
+      // Sembunyikan judul grup yang seluruh itemnya tersaring habis.
+      groups.forEach((group) => {
+        const hasMatch = Array.from(
+          group.querySelectorAll<HTMLAnchorElement>("[data-cmdk-item]"),
+        ).some((el) => visible.includes(el));
+        group.classList.toggle("hidden", !hasMatch);
       });
       if (empty) empty.classList.toggle("hidden", visible.length !== 0);
       activeIndex = 0;

@@ -20,14 +20,14 @@ const lang: Lang = getLang(Astro.params.lang);
 
 <RepoLayout
   title="CONTACT"
-  file="CONTACT.md"
+  file={t(lang, "contactFile")}
   description={t(lang, "contactIntro")}
   lang={lang}
 >
   <header class="reveal mb-8">
     <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
       <span class="text-accent-500" aria-hidden="true">##</span>
-      CONTACT.md
+      {t(lang, "contactFile")}
     </h1>
     <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
       {t(lang, "contactIntro")}

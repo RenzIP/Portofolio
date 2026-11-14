@@ -8,6 +8,13 @@
  * dan nonaktif total saat prefers-reduced-motion.
  */
 import { commits } from "../data/site";
+import { getLang, t, type Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const lang = getLang(Astro.props.lang);
 
 const rows = commits.map((c) => ({
   hash: c.hash,
@@ -22,7 +29,7 @@ const rowsJson = JSON.stringify(rows);
   class="fixed inset-0 z-[90] hidden items-center justify-center p-4"
   role="dialog"
   aria-modal="true"
-  aria-label="Terminal git (easter egg)"
+  aria-label={t(lang, "termAria")}
   data-rows={rowsJson}
 >
   <div
@@ -47,7 +54,7 @@ const rowsJson = JSON.stringify(rows);
         id="git-term-close"
         type="button"
         class="ml-auto rounded-xs px-1.5 py-0.5 font-mono text-xs text-paper/60 transition-colors hover:bg-white/10 hover:text-paper"
-        aria-label="Tutup terminal"
+        aria-label={t(lang, "termClose")}
       >
         ✕ esc
       </button>
@@ -64,12 +71,12 @@ const rowsJson = JSON.stringify(rows);
       <p class="mt-3 text-paper/60">
         <span class="text-accent-400">$</span>
         <span class="type-cursor" aria-hidden="true"></span>
-        <span class="sr-only">Menunggu perintah…</span>
+        <span class="sr-only">{t(lang, "termWaiting")}</span>
       </p>
     </div>
 
     <div class="border-t border-white/10 px-4 py-2 font-mono text-[0.65rem] text-paper/50">
-      easter egg · ditemukan via Konami code ↑↑↓↓←→←→BA
+      {t(lang, "termHint")}
     </div>
   </div>
 </div>

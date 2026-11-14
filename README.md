@@ -27,8 +27,10 @@ Dibangun dengan **Astro** + **Tailwind CSS v4**, output HTML statis.
 - **Command palette** — tekan `Ctrl+K` (atau `⌘+K`) untuk mencari halaman/proyek.
   Navigasi keyboard penuh: `↑` `↓` pilih, `↵` buka, `Esc` tutup.
 - **View transitions** — perpindahan halaman gaya `git checkout` (konten lama
-  geser kiri, konten baru masuk dari kanan, arah dibalik saat back).
-  TopBar + sidebar persisten antar halaman (`transition:persist`).
+  geser kiri, konten baru masuk dari kanan, arah dibalik saat back). Sidebar
+  persisten antar halaman (`transition:persist`, per bahasa); TopBar dirender
+  ulang tiap navigasi supaya breadcrumb dan tautan pemilih bahasa selalu
+  menunjuk halaman yang sedang dibuka.
 - **Commit graph hidup** — dot HEAD berdenyut (pause saat offscreen), klik hash
   untuk menyalin (dengan fallback non-secure context), garis vertikal
   tergambar perlahan saat masuk viewport.

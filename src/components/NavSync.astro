@@ -18,16 +18,21 @@
 
 <script>
   // @ts-nocheck
+  // Kelas state dipakai bersama dengan render SSR (FileTree & MobileNav),
+  // supaya highlight tidak berubah rupa setelah navigasi client-side.
+  import {
+    NAV_ACTIVE_FILE,
+    NAV_IDLE_FILE,
+    NAV_ACTIVE_MOBILE,
+    NAV_IDLE_MOBILE,
+  } from "../data/nav";
+
   // Pola sama seperti ScrollProgress: guard global agar listener sekali pasang.
 
-  const ACTIVE_FILE =
-    "border-accent-500 bg-accent-50 font-medium text-accent-800";
-  const IDLE_FILE =
-    "border-transparent text-ink-soft hover:bg-paper-soft hover:text-ink";
-  const ACTIVE_MOBILE =
-    "border-accent-400 bg-accent-50 font-medium text-accent-800";
-  const IDLE_MOBILE =
-    "border-rule text-ink-soft hover:border-rule-strong hover:text-ink";
+  const ACTIVE_FILE = NAV_ACTIVE_FILE;
+  const IDLE_FILE = NAV_IDLE_FILE;
+  const ACTIVE_MOBILE = NAV_ACTIVE_MOBILE;
+  const IDLE_MOBILE = NAV_IDLE_MOBILE;
 
   // Daftar prefix bahasa diambil dari <html data-locale-prefixes="en ja zh">,
   // jadi menambah bahasa baru tidak perlu menyentuh file ini.

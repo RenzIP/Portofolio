@@ -25,11 +25,11 @@ const toneMap: Record<string, { dot: string; text: string; border: string }> = {
 };
 ---
 
-<RepoLayout title="branches" file="branches.md" lang={lang}>
+<RepoLayout title="branches" file={t(lang, "branchesFile")} lang={lang}>
   <header class="reveal mb-8">
     <h1 class="mb-2 flex items-baseline gap-2 font-display text-2xl font-bold text-ink">
       <span class="text-accent-500" aria-hidden="true">##</span>
-      branches.md
+      {t(lang, "branchesFile")}
     </h1>
     <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
       {t(lang, "branchesIntro")}

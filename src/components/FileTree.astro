@@ -8,6 +8,7 @@
  * tautan aktif setelah navigasi client-side, apa pun bahasanya.
  */
 import { fileTree } from "../data/site";
+import { NAV_ACTIVE_FILE, NAV_IDLE_FILE } from "../data/nav";
 import { getLang, localizePath, navHintKey, t, type Lang } from "../i18n/utils";
 
 interface Props {
@@ -47,16 +48,14 @@ const isActive = (path: string) => {
                   title={t(lang, navHintKey[file.path] ?? "navHome")}
                   aria-current={active ? "page" : undefined}
                   class:list={[
-                    "flex items-center gap-2 border-l-2 py-1.5 pr-2 pl-3 text-xs transition-colors",
-                    active
-                      ? "border-accent-500 bg-accent-50 font-medium text-accent-800"
-                      : "border-transparent text-ink-soft hover:bg-paper-soft hover:text-ink",
+                    "flex items-center gap-2 border-l-2 py-1.5 pr-2 pl-3 text-xs transition-colors rounded-r",
+                    active ? NAV_ACTIVE_FILE : NAV_IDLE_FILE,
                   ]}
                 >
                   <span
                     class:list={[
                       "shrink-0",
-                      file.isDir ? "text-violet-500" : "text-ink-faint",
+                      file.isDir ? "text-verdigris-600 font-bold" : "text-ink-faint",
                     ]}
                     aria-hidden="true"
                   >

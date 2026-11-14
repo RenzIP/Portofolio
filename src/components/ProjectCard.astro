@@ -43,14 +43,14 @@ const statusLabel: Record<string, "projActive" | "projDone" | "projArchived"> = 
 ---
 
 <article
-  class="group relative flex h-full flex-col overflow-hidden rounded-md border border-rule bg-paper transition-all hover:border-accent-400 hover:shadow-lift"
+  class="group relative flex h-full flex-col overflow-hidden rounded-lg border border-rule bg-paper transition-all duration-300 hover:border-accent-500 hover:shadow-lift"
 >
   {
     cover && (
       <div class="overflow-hidden border-b border-rule bg-paper-soft">
         <Image
           src={cover}
-          alt={`Tangkapan layar proyek ${title}`}
+          alt={t(lang, "projImageAlt", { title })}
           widths={[400, 800, 1200]}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 480px"
           loading="lazy"
@@ -61,14 +61,14 @@ const statusLabel: Record<string, "projActive" | "projDone" | "projArchived"> = 
     )
   }
 
-  <div class="flex flex-1 flex-col p-4">
-    <header class="mb-2 flex items-start gap-2">
-      <span class="mt-0.5 shrink-0 text-violet-500" aria-hidden="true">▸</span>
+  <div class="flex flex-1 flex-col p-5">
+    <header class="mb-3 flex items-start gap-2.5">
+      <span class="mt-1 size-2 rounded-full bg-rose-500 shrink-0 group-hover:bg-accent-500 transition-colors" aria-hidden="true"></span>
       <div class="min-w-0 flex-1">
-        <h3 class="font-display text-base font-semibold text-ink">
+        <h3 class="font-display text-base font-bold text-ink group-hover:text-verdigris-600 transition-colors">
           <a
             href={localizePath(`/projects/${slug}`, lang)}
-            class="after:absolute after:inset-0 hover:text-accent-700"
+            class="after:absolute after:inset-0"
           >
             {title}
           </a>
@@ -79,7 +79,7 @@ const statusLabel: Record<string, "projActive" | "projDone" | "projArchived"> = 
             status && (
               <span
                 class:list={[
-                  "rounded-xs border px-1.5 py-px text-[0.65rem] tracking-wide uppercase",
+                  "rounded-full border px-2 py-0.5 text-[0.65rem] font-medium tracking-wide uppercase",
                   statusTone[status] ?? statusTone.selesai,
                 ]}
               >
@@ -91,24 +91,25 @@ const statusLabel: Record<string, "projActive" | "projDone" | "projArchived"> = 
       </div>
     </header>
 
-    <p class="mb-3 flex-1 pl-5 text-sm leading-relaxed text-ink-soft">
+    <p class="mb-4 flex-1 text-sm leading-relaxed text-ink-soft">
       {summary}
     </p>
 
-    <ul class="mb-3 flex flex-wrap gap-1.5 pl-5">
-      {tags.map((tag) => <li class="chip">{tag}</li>)}
+    <ul class="mb-4 flex flex-wrap gap-1.5">
+      {tags.map((tag) => <li class="chip border-rule bg-paper-soft text-[0.7rem] text-verdigris-700 font-mono">{tag}</li>)}
     </ul>
 
-    <footer class="relative z-10 flex gap-4 pl-5 text-xs">
+    <footer class="relative z-10 flex items-center justify-between border-t border-rule pt-3 text-xs">
       {
         repo && (
           <a
             href={repo}
             target="_blank"
             rel="noopener noreferrer"
-            class="text-ink-faint transition-colors hover:text-accent-700"
+            class="inline-flex items-center gap-1 font-mono text-ink-faint transition-colors hover:text-accent-700"
           >
-            {t(lang, "projSource")}
+            <span>{t(lang, "projSource")}</span>
+            <span aria-hidden="true">↗</span>
           </a>
         )
       }
@@ -118,9 +119,10 @@ const statusLabel: Record<string, "projActive" | "projDone" | "projArchived"> = 
             href={demo}
             target="_blank"
             rel="noopener noreferrer"
-            class="text-ink-faint transition-colors hover:text-accent-700"
+            class="inline-flex items-center gap-1 font-medium text-verdigris-600 transition-colors hover:text-verdigris-800"
           >
-            {t(lang, "projLive")}
+            <span>{t(lang, "projLive")}</span>
+            <span aria-hidden="true">↗</span>
           </a>
         )
       }

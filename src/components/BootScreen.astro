@@ -10,6 +10,13 @@
  * - Hanya sekali per sesi (sessionStorage), tidak tiap navigasi.
  */
 import { repo } from "../data/site";
+import { getLang, t, type Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const lang = getLang(Astro.props.lang);
 ---
 
 <div
@@ -17,7 +24,7 @@ import { repo } from "../data/site";
   class="fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-paper px-6"
   role="status"
   aria-live="polite"
-  aria-label="Memuat situs"
+  aria-label={t(lang, "bootLoading")}
 >
   <div class="w-full max-w-md">
     <!-- prompt -->
