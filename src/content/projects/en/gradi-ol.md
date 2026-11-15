@@ -4,6 +4,7 @@ summary: "A browser-based diagram editor for real-time teamwork: Next.js on the 
 date: 2026-07-16
 tags: ["Go", "Next.js", "Redis", "PostgreSQL", "WebSocket"]
 repo: "https://github.com/RenzIP/Graphic-Diagram-Online-Frontend"
+demo: "https://graphic-diagram-online-frontend.vercel.app"
 featured: true
 status: "aktif"
 cover: "../../../assets/projects/gradi-ol.png"

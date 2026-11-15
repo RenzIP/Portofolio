@@ -36,7 +36,7 @@ const lang: Lang = getLang(Astro.params.lang);
 // Ambil hanya entri milik bahasa halaman ini.
 const featured = (await getCollection("projects"))
   .filter((p) => projectLang(p.id) === lang && p.data.featured)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0))
   .slice(0, 6);
 
 const aboutParagraphs = ui[lang].about;

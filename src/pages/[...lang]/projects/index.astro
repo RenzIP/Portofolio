@@ -26,7 +26,7 @@ const lang: Lang = getLang(Astro.params.lang);
 
 const projects = (await getCollection("projects"))
   .filter((p) => projectLang(p.id) === lang)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  .sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
 ---
 
 <RepoLayout title="projects" file="projects/" lang={lang}>

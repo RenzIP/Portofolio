@@ -10,12 +10,12 @@ const projects = defineCollection({
     z.object({
       title: z.string(),
       summary: z.string(),
-      date: z.coerce.date(),
+      date: z.coerce.date().optional(),
       tags: z.array(z.string()).default([]),
       repo: z.string().url().optional(),
       demo: z.string().url().optional(),
       featured: z.boolean().default(false),
-      status: z.enum(["aktif", "selesai", "arsip"]).default("selesai"),
+      status: z.enum(["aktif", "selesai", "arsip"]).optional(),
       cover: image().optional(),
     }),
 });

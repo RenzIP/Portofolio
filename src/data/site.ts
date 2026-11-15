@@ -6,7 +6,7 @@
  *
  * Prinsip isi file ini: semua yang ada di sini harus bisa diverifikasi.
  * Tanggal, hash commit, dan nama repo diambil dari repository publik
- * di github.com/RenzIP — bukan karangan.
+ * di GitHub — bukan karangan.
  */
 
 export const repo = {
@@ -50,64 +50,58 @@ export const fileTree = [
 /**
  * Timeline proyek — ditampilkan sebagai commit log.
  *
- * `hash` adalah short-hash commit ASLI dari repository publik
- * github.com/RenzIP/<source>, dan `date` adalah tanggal commit tersebut.
- * Hash-nya bisa dicari di `git log` repo terkait.
+ * `hash` adalah short-hash commit ASLI dari repository publik.
+ * `source` adalah nama repo; `repo` diisi path lengkap kalau repo bukan
+ * milik RenzIP (misalnya repo organisasi). Hash-nya bisa dicari di
+ * `git log` repo terkait.
  */
 export const commits = [
   {
+    hash: "2f58e50",
+    source: "LerengApps",
+    date: "Nov 2026",
+    refs: ["HEAD", "main"],
+    title: "feat: kontur terrain dengan interval yang bisa diatur",
+    body: "Interval 5/10/20 m, otomatis, atau 1–200 m. Grid dan interpolasi IDW dihitung dari sampel elevasi lokal di perangkat.",
+    stack: ["Java", "Android", "SQLite"],
+  },
+  {
     hash: "985df20",
     source: "Graphic-Diagram-Online-Frontend",
-    date: "Jul 2026 — sekarang",
-    refs: ["HEAD", "main"],
-    title: "feat: editor diagram kolaboratif real-time (GraDiOl)",
-    body: "Frontend Next.js App Router + backend Go/Fiber. Presence pengguna, penguncian node lewat Redis, riwayat versi, dan import diagram dari DSL maupun ASCII.",
+    date: "Jul 2026",
+    refs: ["main"],
+    title: "feat: alur lupa password",
+    body: "Reset password lewat email, plus penyesuaian halaman masuk dan sesi. Frontend Next.js, backend Go/Fiber + Redis.",
     stack: ["Go", "Next.js", "Redis", "WebSocket"],
   },
   {
-    hash: "f920fe7",
-    source: "marketplace-talas-sangkuriang",
-    date: "Sep 2026",
-    refs: [],
-    title: "feat: katalog produk marketplace talas",
-    body: "Situs katalog statis tanpa build step — HTML, CSS, dan JavaScript biasa, dengan galeri produk sebagai beban utama halaman.",
-    stack: ["HTML", "CSS", "JavaScript"],
-  },
-  {
-    hash: "f9f28fd",
-    source: "silog-714240042",
-    date: "Sep 2026",
-    refs: [],
-    title: "feat: sistem logistik dengan Flutter",
-    body: "Tugas praktikum: model domain gudang, barang, dan pengiriman dengan enkapsulasi dan validasi transisi status.",
-    stack: ["Flutter", "Dart", "OOP"],
-  },
-  {
-    hash: "1bdabd0",
-    source: "e-commerce",
+    hash: "91e7972",
+    source: "Graphic-Diagram-Online-Frontend",
     date: "Jul 2026",
     refs: [],
-    title: "feat: aplikasi e-commerce Laravel",
-    body: "Toko online dengan Laravel dan Livewire — autentikasi, katalog produk, dan alur checkout.",
-    stack: ["Laravel", "PHP", "Livewire"],
+    title: "feat: indikator status koneksi WebSocket",
+    body: "Status koneksi dan penanganan WebSocket dibuat eksplisit supaya pengguna tahu saat kanvas kehilangan sinkronisasi.",
+    stack: ["Next.js", "WebSocket", "Redis"],
   },
   {
-    hash: "ec93036",
-    source: "Anonymous-chat-socket",
-    date: "Feb 2026",
+    hash: "6f55090",
+    source: "Website-PEMIRA-ULBI",
+    repo: "Pemira-Website/Website-PEMIRA-ULBI",
+    date: "Jun 2026",
     refs: [],
-    title: "feat: chat anonim real-time lewat WebSocket",
-    body: "Server Python + klien desktop CustomTkinter: room ber-password, pesan pribadi, kirim file sampai 5 MB, indikator mengetik.",
-    stack: ["Python", "WebSocket", "CustomTkinter"],
+    title: "feat: mode pemilihan himatif dan konfigurasi suara",
+    body: "Jenis pemilihan bisa dikonfigurasi, termasuk mode khusus himatif dan opsi kotak kosong. Laravel + Blade.",
+    stack: ["Laravel", "PHP", "Blade"],
   },
   {
-    hash: "7bd3058",
-    source: "Hospital-Management-Desktop",
-    date: "Feb 2026",
+    hash: "52ff770",
+    source: "kavanahub",
+    repo: "KavanaHub/kavanahub",
+    date: "Jan 2026",
     refs: [],
-    title: "feat: aplikasi desktop manajemen rumah sakit",
-    body: "Aplikasi C# WinForms dengan login berbasis peran, pengelolaan pasien, staf, unit, dan laboratorium, plus ekspor laporan ke Excel.",
-    stack: ["C#", "WinForms", ".NET"],
+    title: "feat: profil pengguna dan tampilan per peran",
+    body: "Halaman profil dinamis untuk lima peran, dengan edit data dan logout. Next.js + Express.js.",
+    stack: ["Next.js", "Express.js", "MySQL"],
   },
   {
     hash: "1f4e46d",
@@ -135,13 +129,13 @@ export const branches = [
     name: "feat/backend",
     tone: "violet",
     summary: "API, autentikasi, dan pengelolaan data di sisi server.",
-    items: ["Go", "Fiber", "Node.js", "PHP / Laravel", "Python", "PostgreSQL", "Redis"],
+    items: ["Go", "Fiber", "Node.js", "Express.js", "PHP / Laravel", "Python", "PostgreSQL", "MySQL", "Redis"],
   },
   {
     name: "feat/desktop-mobile",
     tone: "add",
-    summary: "Aplikasi desktop dan mobile di luar web.",
-    items: ["C# / WinForms", "Python", "Flutter", "Dart"],
+    summary: "Aplikasi desktop, Android, dan mobile di luar web.",
+    items: ["Java / Android", "C# / WinForms", "Python", "Flutter", "Dart"],
   },
   {
     name: "chore/tooling",

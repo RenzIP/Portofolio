@@ -38,7 +38,7 @@ const lang: Lang = getLang(Astro.params.lang as string | undefined);
 const { title, summary, tags, date, repo, demo, status, cover } = project.data;
 const { Content } = await render(project);
 
-const formattedDate = date.toLocaleDateString(lang === "id" ? "id-ID" : lang, {
+const formattedDate = date?.toLocaleDateString(lang === "id" ? "id-ID" : lang, {
   year: "numeric",
   month: "long",
   day: "numeric",
@@ -62,7 +62,7 @@ const projectSchema = {
     "@type": "SoftwareSourceCode",
     name: title,
     description: summary,
-    dateCreated: date.toISOString(),
+    ...(date ? { dateCreated: date.toISOString() } : {}),
     keywords: tags.join(", "),
     ...(repo ? { codeRepository: repo } : {}),
     ...(demo ? { url: demo } : {}),
@@ -113,9 +113,13 @@ const projectSchema = {
       }
 
       <div class="flex flex-wrap items-center gap-3 text-xs">
-        <time datetime={date.toISOString()} class="text-ink-faint">
-          {formattedDate}
-        </time>
+        {
+          date && (
+            <time datetime={date.toISOString()} class="text-ink-faint">
+              {formattedDate}
+            </time>
+          )
+        }
         {
           status && (
             <span

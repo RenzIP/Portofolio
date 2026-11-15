@@ -9,6 +9,8 @@ interface Commit {
   hash: string;
   /** Nama repo publik asal commit ini, untuk link verifikasi. */
   source?: string;
+  /** Path lengkap `owner/repo` kalau bukan repo milik RenzIP. */
+  repo?: string;
   date: string;
   refs: readonly string[];
   title: string;
@@ -67,7 +69,7 @@ const lang = getLang(Astro.props.lang);
               </button>
               {commit.source && (
                 <a
-                  href={`https://github.com/RenzIP/${commit.source}/commit/${commit.hash}`}
+                  href={`https://github.com/${commit.repo ?? `RenzIP/${commit.source}`}/commit/${commit.hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   title={`Commit ${commit.hash} di ${commit.source}`}

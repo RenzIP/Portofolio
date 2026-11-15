@@ -42,7 +42,7 @@ const pageCommands = fileTree.flatMap((group) =>
 // proyek, bukan nama file. Hanya entri bahasa halaman ini yang ditampilkan.
 const projectCommands = (await getCollection("projects"))
   .filter((p) => projectLang(p.id) === lang)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0))
   .map((p) => ({
     label: p.data.title,
     hint: p.data.tags.slice(0, 3).join(" · "),
