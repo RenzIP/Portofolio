@@ -1,0 +1,160 @@
+---
+/**
+ * RuangLayout — dokumen penuh untuk beranda Ruang.
+ *
+ * Berbeda dari RepoLayout: tidak ada sidebar/editor, tidak ada ClientRouter.
+ * Halaman ini adalah satu kanvas 3D dengan panel teks; pindah halaman ke
+ * proyek/log memakai navigasi biasa (full page load) supaya WebGL tidak
+ * tertinggal di DOM saat transisi.
+ */
+import "../styles/ruang.css";
+import { repo, socials } from "../data/site";
+import { htmlLang, locales, ogLocale } from "../i18n/ui";
+import {
+  canonicalPath,
+  getLang,
+  localizePath,
+  ogPrefix,
+  type Lang,
+} from "../i18n/utils";
+
+interface Props {
+  title: string;
+  description: string;
+  lang?: Lang;
+}
+
+const { title, description } = Astro.props;
+const lang = getLang(Astro.props.lang);
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+const canonicalUrlPath = canonicalPath(Astro.url.pathname);
+const alternates = locales.map((code) => ({
+  code,
+  href: new URL(
+    localizePath(canonicalUrlPath, code),
+    Astro.site ?? Astro.url.origin,
+  ).href,
+}));
+
+const ogImage = new URL(
+  `/open-graph/${ogPrefix(lang)}home.png`,
+  canonical,
+).href;
+const siteName = `${repo.owner}/${repo.name}`;
+const schemaLang = ogLocale[lang].replace("_", "-");
+
+const socialUrls = socials
+  .filter((s) => s.href.startsWith("http"))
+  .map((s) => s.href);
+
+const personSchema = {
+  "@type": "Person",
+  "@id": `${canonical.origin}/#person`,
+  name: repo.author,
+  alternateName: repo.owner,
+  jobTitle: "Full-Stack Web Developer",
+  description: repo.tagline,
+  url: canonical.origin,
+  email: `mailto:${repo.email}`,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Bandung",
+    addressCountry: "ID",
+  },
+  knowsAbout: [
+    "Web Development",
+    "Full-Stack Development",
+    "Go",
+    "TypeScript",
+    "Next.js",
+    "Astro",
+    "Laravel",
+    "Flutter",
+  ],
+  sameAs: socialUrls,
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${canonical.origin}/#website`,
+      url: canonical.origin,
+      name: siteName,
+      description: repo.tagline,
+      inLanguage: schemaLang,
+      publisher: { "@id": `${canonical.origin}/#person` },
+    },
+    personSchema,
+    {
+      "@type": "ProfilePage",
+      "@id": `${canonical.href}#webpage`,
+      url: canonical.href,
+      name: title,
+      description,
+      inLanguage: schemaLang,
+      isPartOf: { "@id": `${canonical.origin}/#website` },
+      mainEntity: { "@id": `${canonical.origin}/#person` },
+    },
+  ],
+};
+---
+
+<!doctype html>
+<html
+  lang={htmlLang[lang]}
+  data-locale-prefixes={locales
+    .filter((code) => code !== "id")
+    .join(" ")}
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="author" content={repo.author} />
+    <meta name="theme-color" content="#0b0a09" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+
+    {
+      alternates.map((alt) => (
+        <link rel="alternate" hreflang={alt.code} href={alt.href} />
+      ))
+    }
+    <link rel="alternate" hreflang="x-default" href={alternates[0].href} />
+
+    <title>{title} · {siteName}</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={`${title} · ${siteName}`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${title} · ${siteName}`} />
+    <meta property="og:locale" content={ogLocale[lang]} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} · ${siteName}`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={`${title} · ${siteName}`} />
+
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(jsonLd)}
+    />
+  </head>
+
+  <body>
+    <slot />
+  </body>
+</html>

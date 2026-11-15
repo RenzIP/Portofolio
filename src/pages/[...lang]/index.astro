@@ -1,22 +1,24 @@
 ---
 /**
- * Halaman utama — dibingkai sebagai README.md.
+ * Beranda — Ruang kerja 3D.
  *
- * Satu file ini menghasilkan SEMUA bahasa: `/` (id), `/en/`, `/ja/`, `/zh/`.
- * Rest parameter `[...lang]` boleh kosong, jadi home bahasa default tidak
- * perlu punya file terpisah.
+ * Satu file menghasilkan semua bahasa: `/` (id), `/en/`, `/ja/`, `/zh/`.
+ * Data proyek, commit, dan branch datang dari content collection serta
+ * src/data/site.ts; teks ruangan dari src/i18n/ruang.ts. scene.js hanya
+ * menggambar — tidak menyimpan salinan data.
  */
 import { getCollection } from "astro:content";
-import RepoLayout from "../../layouts/RepoLayout.astro";
-import ProjectCard from "../../components/ProjectCard.astro";
-import CommitGraph from "../../components/CommitGraph.astro";
-import { commits, repo } from "../../data/site";
-import { ui } from "../../i18n/ui";
+import RuangLayout from "../../layouts/RuangLayout.astro";
+import { branches, commits, repo, socials } from "../../data/site";
+import { ruang } from "../../i18n/ruang";
+import { shortLabels } from "../../i18n/ui";
 import {
   getLang,
   locales,
   localizePath,
   projectLang,
+  projectSlug,
+  switchLocaleUrl,
   t,
   type Lang,
 } from "../../i18n/utils";
@@ -31,125 +33,542 @@ export function getStaticPaths() {
 }
 
 const lang: Lang = getLang(Astro.params.lang);
+const dict = ruang[lang];
+const localeTag = lang === "id" ? "id-ID" : lang === "zh" ? "zh-CN" : lang;
 
-// Entri konten punya id seperti "gradi-ol" (id) atau "en/gradi-ol" (lainnya).
-// Ambil hanya entri milik bahasa halaman ini.
-const featured = (await getCollection("projects"))
-  .filter((p) => projectLang(p.id) === lang && p.data.featured)
-  .sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0))
-  .slice(0, 6);
-
-const aboutParagraphs = ui[lang].about;
 const projectsUrl = localizePath("/projects", lang);
+const logUrl = localizePath("/log", lang);
+const branchesUrl = localizePath("/branches", lang);
 const contactUrl = localizePath("/contact", lang);
+const githubUrl = `https://github.com/${repo.owner}`;
+
+/* Warna punggung buku. Nama proyek tetap proper noun, jadi warnanya
+   dipetakan per slug — bukan per judul terjemahan. */
+const projectColors: Record<string, string> = {
+  lerengapps: "#8a9a6b",
+  "gradi-ol": "#c05a3a",
+  "pemira-ulbi": "#b48bb5",
+  kavana: "#7d9bc4",
+  "digikampus-ut": "#8fd3b2",
+  sakhaclothing: "#d9c8a8",
+  dapoerunna: "#c98f7a",
+  cafebalebat: "#9aa88b",
+  cuanlimbah: "#6fa39a",
+  goalpath: "#d4b25c",
+};
+
+const statusKey = {
+  aktif: "projActive",
+  selesai: "projDone",
+  arsip: "projArchived",
+} as const;
+
+const monthIndex: Record<string, number> = {
+  Jan: 0,
+  Feb: 1,
+  Mar: 2,
+  Apr: 3,
+  Mei: 4,
+  May: 4,
+  Jun: 5,
+  Jul: 6,
+  Agu: 7,
+  Aug: 7,
+  Sep: 8,
+  Okt: 9,
+  Oct: 9,
+  Nov: 10,
+  Des: 11,
+  Dec: 11,
+};
+
+/** "Nov 2026" -> "2026年11月" untuk ja/zh; "sekarang" ikut diterjemahkan. */
+function formatCommitDate(label: string): string {
+  const match = label.match(/^([A-Za-z]{3})\s+(\d{4})(.*)$/);
+  if (!match) return label;
+  const month = monthIndex[match[1]];
+  if (month === undefined) return label;
+  const date = new Date(Date.UTC(Number(match[2]), month, 1));
+  const formatted = date.toLocaleDateString(localeTag, {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  return formatted + match[3].replace("sekarang", dict.now);
+}
+
+/** "GraDiOl — Editor Diagram..." -> "GraDiOl"; juga menangani tanda hubung. */
+function shortTitle(title: string): string {
+  return title.split(/\s+[—–-]{1,2}\s+/)[0].trim();
+}
+
+const allProjects = (await getCollection("projects"))
+  .filter((project) => projectLang(project.id) === lang)
+  .sort(
+    (a, b) =>
+      (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0),
+  );
+
+const projectViews = allProjects.map((project, index) => {
+  const slug = projectSlug(project.id);
+  const repoName =
+    project.data.repo?.replace(/\/+$/, "").split("/").pop() ?? null;
+  const commit = commits.find((entry) => {
+    const source = "repo" in entry ? entry.repo : entry.source;
+    return source.split("/").pop() === repoName;
+  });
+  const date = project.data.date
+    ? project.data.date.toLocaleDateString(localeTag, {
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      })
+    : null;
+
+  return {
+    slug,
+    n: String(index + 1).padStart(2, "0"),
+    name: shortTitle(project.data.title),
+    fullTitle: project.data.title,
+    summary: project.data.summary,
+    stack: project.data.tags.length
+      ? project.data.tags.join(" · ")
+      : dict.list.pending,
+    date,
+    hash: commit?.hash ?? null,
+    source: repoName,
+    status: project.data.status
+      ? t(lang, statusKey[project.data.status])
+      : null,
+    href: localizePath(`/projects/${slug}`, lang),
+    repoHref: project.data.repo ?? null,
+    color: projectColors[slug] ?? "#8a9a6b",
+  };
+});
+
+const deskProject = projectViews.find((project) => project.slug === "gradi-ol");
+const deskHref = deskProject?.href ?? projectsUrl;
+
+const commitViews = commits.map((commit) => ({
+  ...commit,
+  dateLabel: formatCommitDate(commit.date),
+}));
+
+const tagRef = commits
+  .flatMap((commit) => commit.refs)
+  .find((ref) => ref.startsWith("tag: "));
+const archiveTag = tagRef ? tagRef.replace("tag: ", "") : "v1.0";
+
+const years = [...new Set(commits.flatMap((commit) => commit.date.match(/\d{4}/g) ?? []))].sort();
+const yearsLabel =
+  years.length > 1 ? `${years[0]} — ${years[years.length - 1]}` : years[0] ?? "";
+
+const contactLinks = (dict.copy[4].links ?? []).flatMap((link) => {
+  const social = socials.find(
+    (entry) => entry.label.toLowerCase() === link.key,
+  );
+  return social
+    ? [{ label: link.label, href: social.href, handle: social.handle }]
+    : [];
+});
+
+const sceneData = {
+  projects: projectViews.map((project) => ({
+    key: project.slug,
+    n: project.n,
+    name: project.name,
+    title: project.fullTitle,
+    stack: project.stack,
+    date: project.date,
+    hash: project.hash,
+    source: project.source,
+    status: project.status,
+    summary: project.summary,
+    href: project.href,
+    repoHref: project.repoHref,
+    color: project.color,
+  })),
+  stations: dict.stations,
+  copy: {
+    sheetTag: dict.sheet.tag,
+    stack: dict.sheet.stack,
+    status: dict.sheet.status,
+    commit: dict.sheet.commit,
+    pending: dict.sheet.pending,
+    archiveLabel: dict.archive.label,
+    kinds: dict.tipKinds,
+  },
+  archive: {
+    count: commits.length,
+    hashes: commits.map((commit) => commit.hash),
+    tag: archiveTag,
+    label: dict.archive.label,
+    commitsLabel: dict.archive.commits,
+    years: yearsLabel,
+  },
+  board: dict.board,
+  screen: dict.screen,
+  deskProject: "gradi-ol",
+  repoOwner: repo.owner,
+  contactEmail: repo.email,
+};
+
+const json = JSON.stringify(sceneData).replace(/</g, "\\u003c");
 ---
 
-<RepoLayout title="README" file="README.md" lang={lang}>
-  <!-- Blok intro gaya blok kode komentar -->
-  <section class="reveal mb-14">
-    <div class="code-block relative overflow-hidden p-6 sm:p-8">
-      <!-- Top studio accent line: Marigold - Verdigris - Raspberry -->
-      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-500 via-verdigris-500 to-rose-500"></div>
+<RuangLayout title={dict.meta.title} description={dict.meta.description} lang={lang}>
+  <a class="skip-link" id="skip-list" href="#daftar">{dict.skipList}</a>
 
-      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-rule pb-4 mb-5">
-        <div class="flex items-center gap-2">
-          <span class="inline-block size-2 rounded-full bg-accent-500"></span>
-          <span class="meta-label font-mono text-xs">git status --short</span>
+  <div id="track" aria-hidden="true"></div>
+  <div id="stage" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href={localizePath("/", lang)} data-goto="0">
+      <span class="dot" aria-hidden="true"></span>
+      <span>Bagas <b>/ {dict.brand}</b></span>
+    </a>
+    <div class="topbar-right">
+      <nav class="topnav" aria-label={dict.navAria}>
+        <a href={projectsUrl}>{t(lang, "navProjects")}</a>
+        <a href={logUrl}>{t(lang, "navLog")}</a>
+        <a href={contactUrl}>{t(lang, "navContact")}</a>
+      </nav>
+      <nav class="langs" aria-label={dict.langAria}>
+        {
+          locales.map((code) => (
+            <a
+              href={switchLocaleUrl(Astro.url.pathname, code)}
+              hreflang={code}
+              aria-current={code === lang ? "true" : undefined}
+            >
+              {shortLabels[code]}
+            </a>
+          ))
+        }
+      </nav>
+      <button class="ghost-btn" id="open-list" type="button">
+        {dict.openList}
+        <span class="key" aria-hidden="true">L</span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="rail" aria-label={dict.railAria}>
+    {
+      dict.stations.map((station, index) => (
+        <button
+          type="button"
+          data-goto={index}
+          aria-current={index === 0 ? "true" : undefined}
+        >
+          <span class="num">{String(index + 1).padStart(2, "0")}</span>
+          <span class="label">{station.label}</span>
+          <span class="tick" aria-hidden="true" />
+        </button>
+      ))
+    }
+  </nav>
+
+  <main class="copy" id="copy">
+    {
+      dict.copy.map((block, index) => {
+        return (
+          <section
+            class:list={["copy-inner", index === 0 && "is-active"]}
+            data-copy={index}
+            aria-labelledby={`s${index}`}
+          >
+            <p class="eyebrow">{block.eyebrow}</p>
+            {index === 0 ? (
+              <h1 id={`s${index}`}>
+                {block.title.pre}
+                <em>{block.title.em}</em>
+                {block.title.post}
+              </h1>
+            ) : (
+              <h2 id={`s${index}`}>
+                {block.title.pre}
+                <em>{block.title.em}</em>
+                {block.title.post}
+              </h2>
+            )}
+            <p class="body">{block.body}</p>
+
+            {block.meta && (
+              <p class="meta">
+                {block.meta.map((item) => (
+                  <span>{item}</span>
+                ))}
+              </p>
+            )}
+
+            {block.links && (
+              <p class="meta">
+                {block.links.map((link) => {
+                  const social = socials.find(
+                    (entry) => entry.label.toLowerCase() === link.key,
+                  );
+                  return social ? (
+                    <a
+                      href={social.href}
+                      target={social.href.startsWith("http") ? "_blank" : undefined}
+                      rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    >
+                      {link.label} ↗
+                    </a>
+                  ) : null;
+                })}
+              </p>
+            )}
+
+            {block.cta && (
+              <p class="hint">
+                <a
+                  href={block.cta.kind === "project" ? deskHref : githubUrl}
+                  data-project={block.cta.kind === "project" ? "gradi-ol" : undefined}
+                  target={block.cta.kind === "github" ? "_blank" : undefined}
+                  rel={block.cta.kind === "github" ? "noopener noreferrer" : undefined}
+                >
+                  {block.cta.label} →
+                </a>
+              </p>
+            )}
+
+            {block.hint && index === 0 && (
+              <span class="hint hint-scroll" aria-hidden="true">
+                <svg viewBox="0 0 13 18" fill="none" stroke="currentColor">
+                  <rect x="0.5" y="0.5" width="12" height="17" rx="6" />
+                  <line
+                    class="wheel"
+                    x1="6.5"
+                    y1="4"
+                    x2="6.5"
+                    y2="7"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                {block.hint}
+              </span>
+            )}
+
+            {block.hint && index === 4 && (
+              <p class="hint">
+                <a href={`mailto:${repo.email}`}>{block.hint}</a>
+              </p>
+            )}
+          </section>
+        );
+      })
+    }
+  </main>
+
+  <div class="tip" id="tip" aria-hidden="true">
+    <span class="kind" id="tip-kind">—</span>
+    <span id="tip-label">—</span>
+  </div>
+
+  <div class="readout" aria-hidden="true">
+    <span>CAM <b id="cam-index">01</b> / {String(dict.stations.length).padStart(2, "0")}</span><br />
+    <span id="cam-label">{dict.stations[0].cam}</span>
+    <span class="bar"><i id="cam-bar"></i></span>
+  </div>
+
+  <div class="mprog" aria-hidden="true">
+    <div class="labels">
+      <b id="m-label">01 — {dict.stations[0].label}</b>
+      <span id="m-count">01 / {String(dict.stations.length).padStart(2, "0")}</span>
+    </div>
+    <div class="track" id="m-track">
+      {dict.stations.map((_, index) => (
+        <i class={index === 0 ? "on" : undefined} />
+      ))}
+    </div>
+  </div>
+
+  <div class="boot" id="boot" aria-hidden="true">
+    <p class="boot-line">{dict.boot} <b id="boot-pct">0%</b></p>
+  </div>
+
+  <aside class="sheet" id="sheet" tabindex="-1" aria-hidden="true" aria-labelledby="sheet-title">
+    <div class="sheet-head">
+      <span class="tag" id="sheet-tag">{dict.sheet.tag}</span>
+      <button class="close-btn" id="sheet-close" type="button">
+        {dict.sheet.close} <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <h2 id="sheet-title">—</h2>
+      <p class="year" id="sheet-year">—</p>
+      <p id="sheet-desc">—</p>
+      <dl id="sheet-facts"></dl>
+      <div class="sheet-links">
+        <a class="sheet-link" id="sheet-link" href={deskHref}>
+          {dict.sheet.openProject} <span aria-hidden="true">→</span>
+        </a>
+        <a
+          class="sheet-link"
+          id="sheet-repo"
+          href={deskProject?.repoHref ?? "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        >
+          {dict.sheet.openRepo} <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="list-mode" id="daftar" tabindex="-1" aria-labelledby="list-title">
+    <div class="list-wrap">
+      <div class="list-top">
+        <span class="tag">{dict.list.tag}</span>
+        <button class="close-btn" id="close-list" type="button">
+          {dict.sheet.close} <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+
+      <header class="list-hero">
+        <h1 id="list-title">
+          {dict.list.title.pre}
+          <em>{dict.list.title.em}</em>
+          {dict.list.title.post}
+        </h1>
+        <p>{dict.list.intro}</p>
+        <p class="where">
+          {dict.list.where.map((item) => (
+            <span>{item}</span>
+          ))}
+        </p>
+      </header>
+
+      <section class="list-section" aria-labelledby="lp">
+        <h2 id="lp">
+          {dict.list.projectsHeading} / {String(projectViews.length).padStart(2, "0")}
+        </h2>
+
+        {
+          projectViews.map((project) => (
+            <article class="proj">
+              <span class="n">{project.n}</span>
+              <div>
+                <h3>
+                  <a href={project.href}>{project.fullTitle}</a>
+                </h3>
+                <p class="stack">{project.stack}</p>
+              </div>
+              <p class="desc">{project.summary}</p>
+              <span class="hash">
+                {project.hash && <b>{project.hash}</b>}
+                {[project.date ?? dict.list.pending, project.status]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            </article>
+          ))
+        }
+      </section>
+
+      <section class="list-section" aria-labelledby="ll">
+        <h2 id="ll">
+          {dict.list.commitsHeading} / {String(commitViews.length).padStart(2, "0")}
+        </h2>
+        <ul class="log-list">
+          {
+            commitViews.map((commit) => (
+              <li>
+                <span class="date">{commit.dateLabel}</span>
+                <span class="h">{commit.hash}</span>
+                <span>{commit.title}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="list-section" aria-labelledby="lb">
+        <h2 id="lb">
+          {dict.list.branchesHeading} / {String(branches.length).padStart(2, "0")}
+        </h2>
+        <ul class="log-list">
+          {
+            branches.map((branch) => (
+              <li>
+                <span class="date">{branch.name}</span>
+                <span class="h">{String(branch.items.length).padStart(2, "0")}</span>
+                <span>{branch.summary}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="list-section" aria-labelledby="lpg">
+        <h2 id="lpg">{dict.list.pagesHeading}</h2>
+        <div class="contact-grid">
+          <a href={projectsUrl}>{t(lang, "navProjects")} →</a>
+          <a href={logUrl}>{t(lang, "navLog")} →</a>
+          <a href={branchesUrl}>{t(lang, "navSkills")} →</a>
+          <a href={contactUrl}>{t(lang, "navContact")} →</a>
         </div>
-        <span class="inline-flex items-center gap-1.5 rounded-full border border-verdigris-200 bg-verdigris-50 px-2.5 py-0.5 text-[0.68rem] font-medium text-verdigris-700">
-          <span class="size-1.5 rounded-full bg-verdigris-500 animate-pulse" aria-hidden="true"></span>
-          {t(lang, "status")}
-        </span>
-      </div>
+      </section>
 
-      <h1 class="font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-5xl">
-        {repo.author}<span class="caret" aria-hidden="true"></span>
-      </h1>
-      <p class="mt-4 max-w-2xl font-sans text-base leading-relaxed text-ink-soft sm:text-lg">
-        {t(lang, "tagline")}
-      </p>
-
-      <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-rule pt-4 text-xs text-ink-faint">
-        <span class="flex items-center gap-1.5">
-          <span class="text-rose-500 font-bold">●</span> Bandung, Indonesia
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span class="text-verdigris-500 font-bold">●</span> GitHub: @{repo.owner}
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span class="text-accent-600 font-bold">●</span> Branch: main (clean)
-        </span>
-      </div>
+      <section class="list-section" aria-labelledby="lc">
+        <h2 id="lc">{dict.list.contactHeading}</h2>
+        <div class="contact-grid">
+          {
+            contactLinks.map((link) => (
+              <a
+                href={link.href}
+                target={link.href.startsWith("http") ? "_blank" : undefined}
+                rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              >
+                {link.label} ↗ {link.handle}
+              </a>
+            ))
+          }
+        </div>
+        <p class="list-foot">{dict.list.foot}</p>
+      </section>
     </div>
+  </div>
 
-    <div class="flex flex-wrap gap-3 mt-4">
-      <a
-        href={projectsUrl}
-        class="pressable inline-flex items-center gap-2 rounded-md bg-verdigris-600 px-5 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm hover:bg-verdigris-700"
-      >
-        <span>{t(lang, "ctaProjects")}</span>
-        <span aria-hidden="true">→</span>
-      </a>
-      <a
-        href={contactUrl}
-        class="pressable inline-flex items-center gap-2 rounded-md border border-rule-strong bg-paper px-5 py-2.5 text-xs font-semibold text-ink-soft hover:border-accent-500 hover:text-accent-700"
-      >
-        <span>{t(lang, "ctaContact")}</span>
-      </a>
-    </div>
-  </section>
-
-  <!-- ## About -->
-  <section class="mb-14" data-reveal>
-    <h2
-      class="mb-4 flex items-baseline gap-2 font-display text-xl font-semibold text-ink"
-    >
-      <span class="text-accent-500" aria-hidden="true">##</span>
-      {t(lang, "secAbout")}
-    </h2>
-    <div class="space-y-3 border-l-2 border-rule pl-5">
-      {
-        aboutParagraphs.map((paragraph) => (
-          <p class="max-w-3xl text-sm leading-relaxed text-ink-soft">
-            {paragraph}
-          </p>
-        ))
+  <noscript>
+    <style>
+      #track,
+      #stage,
+      .grain,
+      .vignette,
+      .scrim,
+      .rail,
+      .copy,
+      .readout,
+      .mprog,
+      .boot,
+      .tip,
+      .sheet,
+      #open-list {
+        display: none !important;
       }
-    </div>
-  </section>
+      .topbar {
+        position: static !important;
+        padding: 1rem 1.2rem !important;
+        border-bottom: 1px solid rgba(239, 230, 214, 0.18);
+      }
+      .list-mode {
+        display: block !important;
+        position: static !important;
+      }
+      .list-top .close-btn {
+        display: none !important;
+      }
+    </style>
+  </noscript>
 
-  <!-- ## Featured projects -->
-  <section class="mb-14" data-reveal>
-    <div class="mb-4 flex items-baseline justify-between gap-4">
-      <h2
-        class="flex items-baseline gap-2 font-display text-xl font-semibold text-ink"
-      >
-        <span class="text-accent-500" aria-hidden="true">##</span>
-        {t(lang, "secFeatured")}
-      </h2>
-      <a
-        href={projectsUrl}
-        class="shrink-0 text-xs text-ink-faint transition-colors hover:text-accent-700"
-      >
-        {t(lang, "seeAll")}
-      </a>
-    </div>
-    <div class="reveal-stagger grid gap-4 sm:grid-cols-2">
-      {featured.map((project) => <ProjectCard project={project} lang={lang} />)}
-    </div>
-  </section>
-
-  <!-- ## Recent commits -->
-  <section data-reveal>
-    <h2
-      class="mb-4 flex items-baseline gap-2 font-display text-xl font-semibold text-ink"
-    >
-      <span class="text-accent-500" aria-hidden="true">##</span>
-      {t(lang, "secActivity")}
-    </h2>
-    <div class="code-block p-5">
-      <p class="meta-label mb-4">$ git log --oneline</p>
-      <CommitGraph commits={commits} lang={lang} />
-    </div>
-  </section>
-</RepoLayout>
+  <script type="application/json" id="ruang-data" is:inline set:html={json} />
+  <script is:inline src="/vendor/three.min.js"></script>
+  <script is:inline src="/ruang/scene.js"></script>
+</RuangLayout>
