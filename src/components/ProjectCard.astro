@@ -3,7 +3,6 @@
  * ProjectCard — kartu proyek bergaya entri file di dalam repo.
  */
 import type { CollectionEntry } from "astro:content";
-import { Image } from "astro:assets";
 import {
   getLang,
   localizePath,
@@ -19,7 +18,7 @@ interface Props {
 
 const { project } = Astro.props;
 const lang = getLang(Astro.props.lang);
-const { title, summary, tags, date, repo, demo, status, cover } = project.data;
+const { title, summary, tags, date, repo, demo, status } = project.data;
 const slug = projectSlug(project.id);
 
 const formattedDate = date?.toLocaleDateString(lang === "id" ? "id-ID" : lang, {
@@ -45,22 +44,6 @@ const statusLabel: Record<string, "projActive" | "projDone" | "projArchived"> = 
 <article
   class="group relative flex h-full flex-col overflow-hidden rounded-lg border border-rule bg-paper transition-all duration-300 hover:border-accent-500 hover:shadow-lift"
 >
-  {
-    cover && (
-      <div class="overflow-hidden border-b border-rule bg-paper-soft">
-        <Image
-          src={cover}
-          alt={t(lang, "projImageAlt", { title })}
-          widths={[400, 800, 1200]}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 480px"
-          loading="lazy"
-          decoding="async"
-          class="aspect-[1200/630] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-        />
-      </div>
-    )
-  }
-
   <div class="flex flex-1 flex-col p-5">
     <header class="mb-3 flex items-start gap-2.5">
       <span class="mt-1 size-2 rounded-full bg-rose-500 shrink-0 group-hover:bg-accent-500 transition-colors" aria-hidden="true"></span>
