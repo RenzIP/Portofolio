@@ -65,8 +65,9 @@ Dibangun dengan **Astro 7** + **Tailwind CSS v4**, output HTML statis.
   dibagikan, dan dirayapi mesin pencari. Tautan `hreflang` mengarahkan Google ke
   versi yang tepat, dan OG image-nya juga terpisah per bahasa.
 - **OG image otomatis** — setiap halaman & proyek punya kartu preview 1200×630
-  yang digenerate saat build (`astro-og-canvas`), jadi link yang di-share ke
-  WhatsApp/LinkedIn/Telegram tampil bergambar.
+  yang digenerate saat build (`astro-og-canvas`). Beranda memakai render ruang
+  gelap; halaman arsip tetap kertas terang. Teks Jepang/Tionghoa memakai subset
+  Noto Sans JP/SC supaya tidak tercetak sebagai kotak kosong.
 - **Sitemap & robots.txt** — otomatis saat build.
 - **Favicon** commit-graph kustom (SVG, ringan).
 - **Gambar teroptimasi** — cover proyek diproses `astro:assets`: konversi WebP
@@ -113,7 +114,7 @@ Metafora arsip:
 | Elemen web | Padanan "repo" |
 |---|---|
 | Navigasi | File tree di sidebar (desktop) / baris tab (mobile) |
-| Halaman | Nama file: `README.md`, `log.md`, `branches.md`, `CONTACT.md` |
+| Halaman | Nama file: `ruang/`, `log.md`, `branches.md`, `CONTACT.md` |
 | Section heading | Sintaks markdown (`## Tentang`) |
 | Pengalaman kerja | `git log --graph` — commit dengan hash, refs, dan pesan |
 | Keahlian | Daftar branch (`feat/frontend`, `feat/backend`, ...) |
@@ -177,8 +178,9 @@ src/
 │   ├── global.css            # tema + token warna + animasi arsip
 │   └── ruang.css             # gaya beranda 3D + fallback
 ├── assets/
+│   ├── og/                   # render ruang untuk kartu OG beranda
 │   └── projects/             # cover proyek (diproses astro:assets)
-├── og-fonts/                 # font TTF untuk generate OG image
+├── og-fonts/                 # font OG; subset Noto JP/SC untuk teks CJK
 └── content.config.ts
 
 public/
@@ -256,8 +258,10 @@ Yang masih perlu bahan dari pemilik situs:
 1. **GoalPath dan CuanLimbah** masih entri jujur tanpa tanggal, demo, atau
    repo. Isi detailnya kalau sudah ada — jangan dikarang.
 2. **Screenshot asli** tiap proyek. Saat ini hanya GraDiOl yang punya cover
-   gambar (`src/assets/projects/gradi-ol.png`); kartu lain tampil sebagai
-   kartu tipografi. Timpa dengan PNG 1200×630, lalu `npm run build`.
+   gambar (`src/assets/projects/gradi-ol.png`); cover itu tampil di halaman
+   detail, sedangkan daftar proyek sengaja tanpa gambar supaya kartunya rata.
+   Tambahkan PNG 1200×630 ke `src/assets/projects/`, isi `cover` di frontmatter,
+   lalu `npm run build`.
 3. **Angka hasil** per proyek (jumlah pengguna, waktu muat, ukuran data) —
    hanya kalau datanya benar-benar ada dan bisa dipertanggungjawabkan.
 4. **Koreksi terjemahan Jepang & Cina oleh penutur asli.** Teks EN/JA/ZH ditulis
