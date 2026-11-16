@@ -132,7 +132,7 @@ const id: RuangDict = {
     {
       eyebrow: "02 — Meja / GraDiOl",
       title: { pre: "Diagram yang ", em: "hidup", post: " bersama." },
-      body: "GraDiOl adalah editor diagram kolaboratif real-time. Browser bicara lewat WebSocket, Go/Fiber menjaga state, Redis memegang presence, penguncian node, dan riwayat versi. Layar di meja ini memperlihatkan alurnya — bukan tangkapan layar palsu.",
+      body: "GraDiOl adalah editor diagram kolaboratif real-time. Browser bicara lewat WebSocket, Go/Fiber menjaga state, Redis memegang presence, penguncian node, dan riwayat versi. Layar di meja ini memperlihatkan alurnya.",
       meta: [
         "Next.js · Go/Fiber · Redis · WebSocket",
         "Commit 985df20 · Jul 2026",
@@ -179,7 +179,7 @@ const id: RuangDict = {
     branchesHeading: "Branch",
     pagesHeading: "Halaman",
     contactHeading: "Kontak",
-    foot: "Ruang kerja Bagas · isi diambil dari repository publik dan content collection, bukan dikarang untuk tampilan.",
+    foot: "Ruang kerja Bagas · isi diambil dari repository publik dan content collection.",
     pending: "Detail menyusul",
   },
   sheet: {
@@ -211,7 +211,7 @@ const id: RuangDict = {
     sticky: ["dua orang, satu node", "→ kunci, bukan timpa", "→ presence dulu"],
     foot: [
       "commit 985df20 · jul 2026 · bagas",
-      "bukan mockup — ini alur yang dipakai",
+      "go/fiber · redis · websocket",
     ],
   },
   screen: {
@@ -255,7 +255,7 @@ const en: RuangDict = {
     {
       eyebrow: "02 — Desk / GraDiOl",
       title: { pre: "Diagrams that ", em: "live", post: " together." },
-      body: "GraDiOl is a real-time collaborative diagram editor. The browser talks over WebSocket, Go/Fiber owns the state, and Redis holds presence, node locks, and version history. The screen on this desk shows that flow — not a fake screenshot.",
+      body: "GraDiOl is a real-time collaborative diagram editor. The browser talks over WebSocket, Go/Fiber owns the state, and Redis holds presence, node locks, and version history. The screen on this desk shows that flow.",
       meta: [
         "Next.js · Go/Fiber · Redis · WebSocket",
         "Commit 985df20 · Jul 2026",
@@ -298,7 +298,7 @@ const en: RuangDict = {
     branchesHeading: "Branches",
     pagesHeading: "Pages",
     contactHeading: "Contact",
-    foot: "Bagas's workspace · content comes from public repositories and the content collection, not invented for a mockup.",
+    foot: "Bagas's workspace · content comes from public repositories and the content collection.",
     pending: "Details to follow",
   },
   sheet: {
@@ -330,7 +330,7 @@ const en: RuangDict = {
     sticky: ["two people, one node", "→ lock, don't overwrite", "→ presence first"],
     foot: [
       "commit 985df20 · jul 2026 · bagas",
-      "not a mockup — this is the flow in use",
+      "go/fiber · redis · websocket",
     ],
   },
   screen: {
@@ -378,7 +378,7 @@ const ja: RuangDict = {
     {
       eyebrow: "02 — 机 / GraDiOl",
       title: { pre: "共に", em: "動く", post: "ダイアグラム。" },
-      body: "GraDiOl はリアルタイム共同編集のダイアグラムエディタです。ブラウザは WebSocket で通信し、Go/Fiber が状態を保ち、Redis がプレゼンス、ノードロック、バージョン履歴を担当します。この机の画面はその流れを示しています。偽のスクリーンショットではありません。",
+      body: "GraDiOl はリアルタイム共同編集のダイアグラムエディタです。ブラウザは WebSocket で通信し、Go/Fiber が状態を保ち、Redis がプレゼンス、ノードロック、バージョン履歴を担当します。この机の画面はその流れを示しています。",
       meta: [
         "Next.js · Go/Fiber · Redis · WebSocket",
         "コミット 985df20 · 2026年7月",
@@ -457,7 +457,7 @@ const ja: RuangDict = {
     sticky: ["二人で一つのノード", "→ 上書きせずロック", "→ まずプレゼンス"],
     foot: [
       "commit 985df20 · 2026年7月 · bagas",
-      "モックアップではない — 実際の流れ",
+      "go/fiber · redis · websocket",
     ],
   },
   screen: {
@@ -505,7 +505,7 @@ const zh: RuangDict = {
     {
       eyebrow: "02 — 书桌 / GraDiOl",
       title: { pre: "一起", em: "生长", post: "的图表。" },
-      body: "GraDiOl 是一个实时协作图表编辑器。浏览器通过 WebSocket 通信，Go/Fiber 维护状态，Redis 负责在线状态、节点锁定和版本历史。桌上的屏幕展示的是这条流程——不是假截图。",
+      body: "GraDiOl 是一个实时协作图表编辑器。浏览器通过 WebSocket 通信，Go/Fiber 维护状态，Redis 负责在线状态、节点锁定和版本历史。桌上的屏幕展示的是这条流程。",
       meta: [
         "Next.js · Go/Fiber · Redis · WebSocket",
         "提交 985df20 · 2026年7月",
@@ -552,7 +552,7 @@ const zh: RuangDict = {
     branchesHeading: "分支",
     pagesHeading: "页面",
     contactHeading: "联系",
-    foot: "Bagas 的工作间 · 内容来自公开仓库和内容集合，不是为展示编造的。",
+    foot: "Bagas 的工作间 · 内容来自公开仓库和内容集合。",
     pending: "详情稍后补充",
   },
   sheet: {
@@ -584,7 +584,7 @@ const zh: RuangDict = {
     sticky: ["两个人，一个节点", "→ 锁定，而不是覆盖", "→ 先做在线状态"],
     foot: [
       "commit 985df20 · 2026年7月 · bagas",
-      "不是 mockup —— 这是实际流程",
+      "go/fiber · redis · websocket",
     ],
   },
   screen: {
