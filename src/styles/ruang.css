@@ -334,8 +334,8 @@ button {
   top: -2rem;
   right: -1.2rem;
   bottom: -2rem;
-  width: 10rem;
-  background: radial-gradient(80% 60% at 100% 50%, rgba(7, 6, 5, 0.55), transparent 70%);
+  width: 12rem;
+  background: radial-gradient(80% 60% at 100% 50%, rgba(7, 6, 5, 0.82), transparent 72%);
   pointer-events: none;
 }
 
