@@ -51,7 +51,7 @@ const id = {
   ],
   status: "Terbuka untuk peluang",
 
-  navHome: "Tentang saya",
+  navHome: "Ruang kerja",
   navProjects: "Proyek",
   navLog: "Riwayat",
   navSkills: "Keahlian",
@@ -95,7 +95,7 @@ const id = {
   projectsEmpty: "Direktori kosong. Belum ada proyek.",
 
   p404Body: "Halaman yang Anda tuju tidak ada di repository ini.",
-  p404Back: "← kembali ke README.md",
+  p404Back: "← kembali ke ruang",
 
   cmdkPlaceholder: "Ketik untuk mencari…",
   cmdkEmpty: "Tidak ada hasil.",
@@ -145,7 +145,7 @@ const en: Dict = {
   ],
   status: "Open to opportunities",
 
-  navHome: "About me",
+  navHome: "Workspace",
   navProjects: "Projects",
   navLog: "History",
   navSkills: "Skills",
@@ -189,7 +189,7 @@ const en: Dict = {
   projectsEmpty: "Empty directory. No projects yet.",
 
   p404Body: "The page you're looking for does not exist in this repository.",
-  p404Back: "← back to README.md",
+  p404Back: "← back to the room",
 
   cmdkPlaceholder: "Type to search…",
   cmdkEmpty: "No results.",
@@ -236,7 +236,7 @@ const ja: Dict = {
   ],
   status: "お仕事のご相談を受け付けています",
 
-  navHome: "自己紹介",
+  navHome: "作業部屋",
   navProjects: "プロジェクト",
   navLog: "履歴",
   navSkills: "スキル",
@@ -280,7 +280,7 @@ const ja: Dict = {
   projectsEmpty: "ディレクトリは空です。プロジェクトはまだありません。",
 
   p404Body: "お探しのページは、このリポジトリに存在しません。",
-  p404Back: "← README.md に戻る",
+  p404Back: "← 作業部屋に戻る",
 
   cmdkPlaceholder: "入力して検索…",
   cmdkEmpty: "該当する項目がありません。",
@@ -326,7 +326,7 @@ const zh: Dict = {
   ],
   status: "欢迎工作机会",
 
-  navHome: "关于我",
+  navHome: "工作间",
   navProjects: "项目",
   navLog: "历程",
   navSkills: "技能",
@@ -368,7 +368,7 @@ const zh: Dict = {
   projectsEmpty: "目录为空，还没有项目。",
 
   p404Body: "你要找的页面不在这个仓库里。",
-  p404Back: "← 返回 README.md",
+  p404Back: "← 返回工作间",
 
   cmdkPlaceholder: "输入以搜索…",
   cmdkEmpty: "没有结果。",

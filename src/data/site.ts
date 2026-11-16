@@ -38,7 +38,7 @@ export const fileTree = [
   {
     dir: "src",
     files: [
-      { label: "README.md", path: "/", hint: "Tentang saya", isDir: false },
+      { label: "ruang/", path: "/", hint: "Ruang kerja", isDir: true },
       { label: "projects/", path: "/projects", hint: "Proyek", isDir: true },
       { label: "log.md", path: "/log", hint: "Riwayat", isDir: false },
       { label: "branches.md", path: "/branches", hint: "Keahlian", isDir: false },

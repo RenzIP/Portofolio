@@ -63,7 +63,7 @@
     navPath === "/" ? current === "/" : current.startsWith(navPath);
 
   const fileLabel = (canonical) => {
-    if (canonical === "/") return "README.md";
+    if (canonical === "/") return "ruang/";
     if (canonical === "/projects") return "projects/";
     if (canonical.startsWith("/projects/")) {
       const slug = canonical.split("/").filter(Boolean).pop() ?? "";

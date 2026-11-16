@@ -17,7 +17,7 @@ const lang = getLang(Astro.props.lang);
 const current = canonicalPath(Astro.url.pathname);
 const pathLabel =
   current === "/"
-    ? "README.md"
+    ? "ruang/"
     : current === "/projects"
       ? "projects/"
       : current.startsWith("/projects/")
