@@ -49,41 +49,49 @@ const CJK_FAMILY: Partial<Record<Lang, string>> = {
 /* ---------- halaman statis, per bahasa ---------- */
 // Kunci TIDAK boleh mengandung "/" — itu yang membuat folder sampah
 // seperti /open-graph/project-en/gradi-ol.png sebelum perbaikan.
-const staticPages = Object.fromEntries(
-  locales.flatMap((lang) => {
-    const p = ogPrefix(lang);
-    return [
-      [
-        `${p}home`,
-        {
-          title: ruang[lang].meta.title,
-          description: ruang[lang].meta.description,
-          lang,
-        },
-      ],
-      [
-        `${p}projects`,
-        { title: "projects/", description: t(lang, "ogProjectsDesc"), lang },
-      ],
-      [
-        `${p}log`,
-        { title: "log.md", description: t(lang, "ogLogDesc"), lang },
-      ],
-      [
-        `${p}branches`,
-        {
-          title: "branches.md",
-          description: t(lang, "ogBranchesDesc"),
-          lang,
-        },
-      ],
-      [
-        `${p}contact`,
-        { title: "CONTACT.md", description: t(lang, "ogContactDesc"), lang },
-      ],
-    ];
-  }),
-);
+const staticPages = {
+  ...Object.fromEntries(
+    locales.flatMap((lang) => {
+      const p = ogPrefix(lang);
+      return [
+        [
+          `${p}home`,
+          {
+            title: ruang[lang].meta.title,
+            description: ruang[lang].meta.description,
+            lang,
+          },
+        ],
+        [
+          `${p}projects`,
+          { title: "projects/", description: t(lang, "ogProjectsDesc"), lang },
+        ],
+        [
+          `${p}log`,
+          { title: "log.md", description: t(lang, "ogLogDesc"), lang },
+        ],
+        [
+          `${p}branches`,
+          {
+            title: "branches.md",
+            description: t(lang, "ogBranchesDesc"),
+            lang,
+          },
+        ],
+        [
+          `${p}contact`,
+          { title: "CONTACT.md", description: t(lang, "ogContactDesc"), lang },
+        ],
+      ];
+    }),
+  ),
+  // Satu halaman 404 untuk semua URL, bahasanya Indonesia.
+  "404": {
+    title: "404",
+    description: t("id", "p404Body"),
+    lang: "id" as const,
+  },
+};
 
 /* ---------- proyek dari content collection, per bahasa ---------- */
 const projects = await getCollection("projects");
