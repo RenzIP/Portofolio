@@ -257,11 +257,11 @@ Yang masih perlu bahan dari pemilik situs:
 
 1. **GoalPath dan CuanLimbah** masih entri jujur tanpa tanggal, demo, atau
    repo. Isi detailnya kalau sudah ada — jangan dikarang.
-2. **Screenshot asli** tiap proyek. Saat ini hanya GraDiOl yang punya cover
-   gambar (`src/assets/projects/gradi-ol.png`); cover itu tampil di halaman
-   detail, sedangkan daftar proyek sengaja tanpa gambar supaya kartunya rata.
-   Tambahkan PNG 1200×630 ke `src/assets/projects/`, isi `cover` di frontmatter,
-   lalu `npm run build`.
+2. **Screenshot asli** tiap proyek. GraDiOl saat ini memakai cover tipografi
+   (`src/assets/projects/gradi-ol.png`), bukan tangkapan layar. Cover hanya
+   tampil di halaman detail; daftar proyek sengaja tanpa gambar supaya
+   kartunya rata. Tambahkan PNG 1200×630 asli ke `src/assets/projects/`,
+   isi `cover` di frontmatter, lalu `npm run build`.
 3. **Angka hasil** per proyek (jumlah pengguna, waktu muat, ukuran data) —
    hanya kalau datanya benar-benar ada dan bisa dipertanggungjawabkan.
 4. **Koreksi terjemahan Jepang & Cina oleh penutur asli.** Teks EN/JA/ZH ditulis
