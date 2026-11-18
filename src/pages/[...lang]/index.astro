@@ -327,7 +327,13 @@ const json = JSON.stringify(sceneData).replace(/</g, "\\u003c");
             {block.cta && (
               <p class="hint">
                 <a
-                  href={block.cta.kind === "project" ? deskHref : githubUrl}
+                  href={
+                    block.cta.kind === "project"
+                      ? deskHref
+                      : block.cta.kind === "projects"
+                        ? projectsUrl
+                        : githubUrl
+                  }
                   data-project={block.cta.kind === "project" ? "gradi-ol" : undefined}
                   target={block.cta.kind === "github" ? "_blank" : undefined}
                   rel={block.cta.kind === "github" ? "noopener noreferrer" : undefined}

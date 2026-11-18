@@ -3,8 +3,9 @@
 Dua lapis, satu situs.
 
 **Beranda** adalah *Ruang*: ruangan kerja 3D yang digerakkan scroll. Kamera
-melewati lima titik — meja GraDiOl, rak sepuluh buku proyek, papan arsitektur,
-arsip commit, dan jendela kontak. Benda di ruangan bisa diklik.
+melewati lima titik — meja dengan monitor yang berganti-ganti menampilkan
+sepuluh proyek, rak sepuluh buku, papan arsitektur GraDiOl, arsip commit, dan
+jendela kontak. Benda di ruangan bisa diklik.
 
 **Halaman dalam** adalah *arsip repo*: `/projects`, `/log`, `/branches`,
 `/contact`, dan detail tiap proyek tetap dibingkai sebagai file di dalam
@@ -31,6 +32,11 @@ Dibangun dengan **Astro 7** + **Tailwind CSS v4**, output HTML statis.
 - **Beranda 3D** — ruangan kerja yang bisa di-scroll; kamera berpindah lewat
   lima stasiun. Objeknya bukan hiasan: klik buku untuk membuka lembar proyek,
   klik papan untuk lompat ke arsip commit, klik jendela untuk membuka email.
+- **Monitor proyek** — layar di meja berganti-ganti menampilkan kesepuluh
+  proyek (nama, stack, tanggal, hash) tiap ~6,6 detik. Klik monitor untuk
+  membuka proyek yang sedang tampil; kalau kamera masih di stasiun lain, klik
+  pertama membawa ke meja dulu. Siklus berhenti saat `prefers-reduced-motion`,
+  tab tidak aktif, atau sheet/daftar terbuka.
 - **Daftar proyek tanpa kanvas** — tekan `L` atau tombol daftar untuk membaca
   semuanya sebagai daftar biasa; `Esc` menutup. Fokus keyboard terkunci di
   dalam panel selama panel terbuka.
@@ -241,8 +247,9 @@ Halaman detail otomatis dibuat di `/projects/proyek-baru` (dan `/en/projects/...
 
 Sudah beres:
 
-- **Beranda Ruang** — scene 3D, lima stasiun, lembar proyek, daftar tanpa
-  kanvas, fallback tanpa WebGL, dan teks id/en/ja/zh.
+- **Beranda Ruang** — scene 3D, lima stasiun, monitor proyek berputar, lembar
+  proyek, daftar tanpa kanvas, fallback tanpa WebGL, tata letak portrait dan
+  landscape HP, serta teks id/en/ja/zh.
 - **Identitas nyata** — nama, email, dan LinkedIn di `src/data/site.ts`
   (dipakai juga oleh JSON-LD dan meta tag).
 - **Domain produksi** `https://bagasip.my.id` di `astro.config.mjs`,

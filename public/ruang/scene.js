@@ -492,10 +492,332 @@
 
   buildRoom();
 
+  /* ---------------- monitor ---------------- */
+
+  const MONITOR_W = 1024;
+  const MONITOR_H = 576;
+  const MONITOR_INTERVAL = 6.6;
+  const MONITOR_WIPE = 0.72;
+  const MONITOR_FALLBACK = {
+    key: "ruang",
+    n: "00",
+    name: "Ruang",
+    title: "",
+    summary: "",
+    stack: "",
+    color: "#8fd3b2",
+  };
+
+  let monitor = null;
+
+  function monitorFont(size, weight, mono) {
+    const family = mono
+      ? "'JetBrains Mono Variable', 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', 'Microsoft YaHei', monospace"
+      : "'Bricolage Grotesque Variable', 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', 'Microsoft YaHei', sans-serif";
+    return `${weight || 400} ${size}px ${family}`;
+  }
+
+  function tint(hex, alpha) {
+    const raw = String(hex || "").replace("#", "");
+    if (!/^[0-9a-f]{6}$/i.test(raw)) return `rgba(143, 211, 178, ${alpha})`;
+    const n = parseInt(raw, 16);
+    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+  }
+
+  function fitText(ctx, text, maxWidth) {
+    const value = String(text || "");
+    if (ctx.measureText(value).width <= maxWidth) return value;
+    let out = value;
+    while (out.length && ctx.measureText(`${out}…`).width > maxWidth) {
+      out = out.slice(0, -1);
+    }
+    return `${out.trimEnd()}…`;
+  }
+
+  function wrapText(ctx, text, maxWidth, maxLines) {
+    const words = String(text || "").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = "";
+    const flush = () => {
+      if (line) {
+        lines.push(line);
+        line = "";
+      }
+    };
+    for (const word of words) {
+      const test = line ? `${line} ${word}` : word;
+      if (ctx.measureText(test).width <= maxWidth) {
+        line = test;
+        continue;
+      }
+      flush();
+      if (ctx.measureText(word).width <= maxWidth) {
+        line = word;
+        continue;
+      }
+      let chunk = "";
+      for (const ch of word) {
+        if (chunk && ctx.measureText(chunk + ch).width > maxWidth) {
+          lines.push(chunk);
+          chunk = ch;
+        } else {
+          chunk += ch;
+        }
+      }
+      line = chunk;
+    }
+    flush();
+    if (lines.length <= maxLines) return lines;
+    const kept = lines.slice(0, maxLines);
+    let tail = kept[maxLines - 1];
+    while (tail.length && ctx.measureText(`${tail}…`).width > maxWidth) {
+      tail = tail.slice(0, -1);
+    }
+    kept[maxLines - 1] = `${tail.trimEnd()}…`;
+    return kept;
+  }
+
+  function drawMonitorSlide(ctx, project, index) {
+    const w = MONITOR_W;
+    const h = MONITOR_H;
+    const accent = project.color || "#8fd3b2";
+    const total = String(Math.max(1, PROJECTS.length)).padStart(2, "0");
+    const label = (SCREEN.label || "Proyek").toUpperCase();
+    const hint = SCREEN.hint || "";
+    const number = project.n || String(index + 1).padStart(2, "0");
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#08120f";
+    ctx.fillRect(0, 0, w, h);
+
+    const glow = ctx.createRadialGradient(w * 0.82, h * 0.1, 16, w * 0.82, h * 0.1, w * 0.82);
+    glow.addColorStop(0, tint(accent, 0.26));
+    glow.addColorStop(0.45, tint(accent, 0.07));
+    glow.addColorStop(1, tint(accent, 0));
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = "rgba(143, 211, 178, 0.09)";
+    for (let x = 0; x < w; x += 30) {
+      for (let y = 0; y < h; y += 30) ctx.fillRect(x, y, 1, 1);
+    }
+
+    /* nomor proyek raksasa sebagai latar */
+    ctx.save();
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = accent;
+    ctx.font = monitorFont(260, 700, false);
+    ctx.textAlign = "right";
+    ctx.fillText(number, w - 48, 304);
+    ctx.restore();
+
+    /* header */
+    ctx.fillStyle = "rgba(6, 15, 12, 0.86)";
+    ctx.fillRect(0, 0, w, 64);
+    ctx.fillStyle = tint(accent, 0.35);
+    ctx.fillRect(0, 62, w, 2);
+    ctx.fillStyle = accent;
+    ctx.beginPath();
+    ctx.arc(48, 32, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#dff3e8";
+    ctx.font = monitorFont(17, 600, true);
+    ctx.fillText(label, 68, 39);
+
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#6f8b7e";
+    ctx.font = monitorFont(16, 400, true);
+    ctx.fillText(`${number} / ${total}`, w - 48, 39);
+    ctx.textAlign = "left";
+
+    /* nama + judul lengkap */
+    ctx.fillStyle = "#f4efe4";
+    ctx.font = monitorFont(74, 600, false);
+    const nameLines = wrapText(ctx, project.name || project.key || "", w - 384, 2);
+    let y = 190;
+    nameLines.forEach((line) => {
+      ctx.fillText(line, 48, y);
+      y += 80;
+    });
+
+    if (project.title && project.title !== project.name) {
+      ctx.fillStyle = "#7f9a8d";
+      ctx.font = monitorFont(21, 400, false);
+      ctx.fillText(fitText(ctx, project.title, w - 384), 48, y + 4);
+      y += 38;
+    }
+
+    y += 14;
+    ctx.fillStyle = accent;
+    ctx.fillRect(48, y, 88, 4);
+    y += 38;
+
+    ctx.fillStyle = "#a9c4b7";
+    ctx.font = monitorFont(24, 400, false);
+    const summaryLines = wrapText(ctx, project.summary || "", w - 324, 2);
+    summaryLines.forEach((line) => {
+      ctx.fillText(line, 48, y);
+      y += 34;
+    });
+
+    if (project.stack) {
+      ctx.fillStyle = tint(accent, 0.82);
+      ctx.font = monitorFont(17, 500, true);
+      ctx.fillText(fitText(ctx, project.stack, w - 96), 48, h - 118);
+    }
+
+    /* footer */
+    ctx.strokeStyle = "rgba(143, 211, 178, 0.16)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(48, h - 86);
+    ctx.lineTo(w - 48, h - 86);
+    ctx.stroke();
+
+    ctx.fillStyle = "#6f8b7e";
+    ctx.font = monitorFont(16, 400, true);
+    const foot = [
+      project.date,
+      project.hash ? `commit ${project.hash}` : null,
+      project.status,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    ctx.fillText(fitText(ctx, foot, w - 420), 48, h - 48);
+
+    ctx.textAlign = "right";
+    ctx.fillStyle = tint(accent, 0.9);
+    ctx.font = monitorFont(15, 500, true);
+    ctx.fillText(hint, w - 48, h - 48);
+    ctx.textAlign = "left";
+
+    /* titik progres */
+    for (let i = 0; i < PROJECTS.length; i++) {
+      const on = i === index;
+      const dotX = 51 + i * 18;
+      const dotY = h - 21;
+      if (on) {
+        ctx.fillStyle = accent;
+        roundRect(ctx, dotX - 3, dotY - 2.5, 16, 5, 2.5);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = "rgba(143, 211, 178, 0.24)";
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function makeMonitor() {
+    const canvases = [
+      document.createElement("canvas"),
+      document.createElement("canvas"),
+    ];
+    const out = document.createElement("canvas");
+    [canvases[0], canvases[1], out].forEach((canvas) => {
+      canvas.width = MONITOR_W;
+      canvas.height = MONITOR_H;
+    });
+    const ctxs = canvases.map((canvas) => canvas.getContext("2d"));
+    const ctxOut = out.getContext("2d");
+
+    const found = PROJECTS.findIndex((p) => p.key === DATA.deskProject);
+    const index = found >= 0 ? found : 0;
+    const current = PROJECTS[index] || MONITOR_FALLBACK;
+    drawMonitorSlide(ctxs[0], current, index);
+    ctxOut.drawImage(canvases[0], 0, 0);
+
+    const texture = new THREE.CanvasTexture(out);
+    texture.encoding = THREE.sRGBEncoding;
+    texture.anisotropy = 8;
+
+    return {
+      texture,
+      screen: null,
+      canvases,
+      ctxs,
+      out,
+      ctxOut,
+      index,
+      current,
+      front: 0,
+      from: 0,
+      to: 0,
+      t: 1,
+      acc: 0,
+      wipeAcc: 0,
+    };
+  }
+
+  function advanceMonitor() {
+    if (!monitor || PROJECTS.length < 2) return;
+    const nextIndex = (monitor.index + 1) % PROJECTS.length;
+    const nextSlot = 1 - monitor.front;
+    drawMonitorSlide(monitor.ctxs[nextSlot], PROJECTS[nextIndex], nextIndex);
+    monitor.from = monitor.front;
+    monitor.to = nextSlot;
+    monitor.t = 0;
+    monitor.index = nextIndex;
+    monitor.current = PROJECTS[nextIndex];
+    monitor.acc = 0;
+    if (monitor.screen && monitor.screen.userData.hotspot) {
+      monitor.screen.userData.hotspot.label = monitor.current.name;
+    }
+    if (hoveredHotspot === monitor.screen) {
+      tipLabel.textContent = monitor.current.name;
+    }
+  }
+
+  function compositeMonitor(t) {
+    if (!monitor) return;
+    const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const edge = Math.round(eased * MONITOR_W);
+    const { ctxOut, canvases, from, to } = monitor;
+    ctxOut.clearRect(0, 0, MONITOR_W, MONITOR_H);
+    ctxOut.drawImage(canvases[from], 0, 0);
+    if (edge > 0) {
+      ctxOut.save();
+      ctxOut.beginPath();
+      ctxOut.rect(0, 0, edge, MONITOR_H);
+      ctxOut.clip();
+      ctxOut.drawImage(canvases[to], 0, 0);
+      ctxOut.restore();
+      ctxOut.fillStyle = tint(monitor.current.color, 0.8);
+      ctxOut.fillRect(Math.max(0, edge - 2), 0, 3, MONITOR_H);
+    }
+    monitor.texture.needsUpdate = true;
+  }
+
+  function tickMonitor(dt) {
+    if (!monitor) return;
+    const paused = reduceMotion || document.hidden || sheetOpen || listOpen;
+    if (monitor.t < 1) {
+      /* jangan tinggalkan layar setengah ter-wipe saat sheet/daftar dibuka */
+      if (paused) {
+        monitor.t = 1;
+        monitor.front = monitor.to;
+        compositeMonitor(1);
+        return;
+      }
+      monitor.t = Math.min(1, monitor.t + dt / MONITOR_WIPE);
+      monitor.wipeAcc += dt;
+      if (monitor.t >= 1 || monitor.wipeAcc >= 1 / 30) {
+        monitor.wipeAcc = 0;
+        compositeMonitor(monitor.t);
+      }
+      if (monitor.t >= 1) monitor.front = monitor.to;
+      return;
+    }
+    if (paused) return;
+    monitor.acc += dt;
+    if (monitor.acc >= MONITOR_INTERVAL) advanceMonitor();
+  }
+
   /* ---------------- desk ---------------- */
 
   function buildDesk() {
-    const desk = PROJECTS.find((p) => p.key === DATA.deskProject) || null;
     const top = box(3.5, 0.075, 1.05, mat.wood, 0, 0.95, -0.58);
     world.add(top);
     world.add(box(0.075, 0.92, 0.9, mat.woodDark, -1.62, 0.46, -0.6));
@@ -510,112 +832,27 @@
     const frame = box(1.5, 0.9, 0.055, mat.screenFrame, 0, 1.55, -0.83);
     world.add(frame);
 
-    const screenTex = canvasTex(1024, 576, (ctx, w, h) => {
-      ctx.fillStyle = "#08120f";
-      ctx.fillRect(0, 0, w, h);
-
-      const g = ctx.createRadialGradient(w * 0.5, h * 0.4, 30, w * 0.5, h * 0.4, w * 0.7);
-      g.addColorStop(0, "rgba(24,60,48,0.55)");
-      g.addColorStop(1, "rgba(8,18,15,0)");
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.fillStyle = "#0d1d18";
-      ctx.fillRect(0, 0, w, 52);
-      ctx.fillStyle = "#8fd3b2";
-      ctx.font = "600 19px 'JetBrains Mono Variable', monospace";
-      ctx.fillText("GRADIOL", 26, 33);
-      ctx.fillStyle = "#5b7469";
-      ctx.font = "400 14px 'JetBrains Mono Variable', monospace";
-      ctx.fillText(SCREEN.subtitle || "", 132, 33);
-      ctx.fillStyle = "#f2b45c";
-      ctx.beginPath();
-      ctx.arc(w - 34, 26, 5, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "rgba(143,211,178,0.14)";
-      for (let x = 0; x < w; x += 24) {
-        for (let y = 52; y < h; y += 24) {
-          ctx.fillRect(x, y, 1, 1);
-        }
-      }
-
-      const node = (x, y, bw, bh, label, sub, tone) => {
-        ctx.fillStyle = "rgba(12,30,24,0.92)";
-        roundRect(ctx, x, y, bw, bh, 4);
-        ctx.fill();
-        ctx.strokeStyle = tone;
-        ctx.lineWidth = 2;
-        roundRect(ctx, x, y, bw, bh, 4);
-        ctx.stroke();
-        ctx.fillStyle = "#dff3e8";
-        ctx.font = "600 20px 'JetBrains Mono Variable', monospace";
-        ctx.fillText(label, x + 18, y + 34);
-        ctx.fillStyle = "#6f8b7e";
-        ctx.font = "400 14px 'JetBrains Mono Variable', monospace";
-        ctx.fillText(sub, x + 18, y + 58);
-      };
-
-      node(70, 120, 214, 84, "BROWSER", "next.js · app router", "#f2b45c");
-      node(398, 120, 228, 84, "GO / FIBER", "state · broadcast", "#8fd3b2");
-      node(740, 120, 214, 84, "REDIS", "presence · lock", "#c05a3a");
-      node(398, 300, 228, 84, "VERSION", "snapshot per commit", "#8fd3b2");
-      node(70, 300, 214, 84, "DSL / ASCII", "import diagram", "#f2b45c");
-
-      const wire = (x1, y1, x2, y2, color) => {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      };
-      wire(284, 162, 396, 162, "#5c7d6e");
-      wire(626, 162, 738, 162, "#5c7d6e");
-      wire(512, 204, 512, 298, "#5c7d6e");
-      wire(284, 342, 396, 342, "#5c7d6e");
-      wire(626, 342, 626, 204, "#5c7d6e");
-
-      ctx.fillStyle = "#3f574d";
-      ctx.font = "400 13px 'JetBrains Mono Variable', monospace";
-      ctx.fillText("websocket", 306, 152);
-      ctx.fillText("commands", 648, 152);
-
-      ctx.strokeStyle = "rgba(143,211,178,0.18)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, 452);
-      ctx.lineTo(w, 452);
-      ctx.stroke();
-      ctx.fillStyle = "#6f8b7e";
-      ctx.font = "400 14px 'JetBrains Mono Variable', monospace";
-      ctx.fillText(SCREEN.presence || "presence", 70, 490);
-      ctx.fillText(SCREEN.lock || "node lock", 70, 514);
-      ctx.fillText(SCREEN.history || "version history", 70, 538);
-      ctx.fillStyle = "#f2b45c";
-      ctx.fillText("●", 46, 490);
-      ctx.fillText("●", 46, 514);
-      ctx.fillText("●", 46, 538);
-
-      ctx.fillStyle = "#3f574d";
-      ctx.fillText(desk && desk.hash ? `commit ${desk.hash}` : "", w - 250, 512);
-      ctx.fillText(`bagas / ${String(DATA.repoOwner || "RenzIP").toLowerCase()}`, w - 250, 538);
-    });
+    monitor = makeMonitor();
 
     const screen = new THREE.Mesh(
       new THREE.PlaneGeometry(1.43, 0.83),
       new THREE.MeshStandardMaterial({
-        map: screenTex,
+        map: monitor.texture,
         emissive: 0xffffff,
-        emissiveMap: screenTex,
-        emissiveIntensity: 0.82,
+        emissiveMap: monitor.texture,
+        emissiveIntensity: 0.95,
         roughness: 0.35,
         metalness: 0.05,
       })
     );
     screen.position.set(0, 1.55, -0.799);
     world.add(screen);
-    hotspot(screen, { kind: "desk", label: desk ? desk.name : "GraDiOl", station: 1 });
+    monitor.screen = screen;
+    hotspot(screen, {
+      kind: "monitor",
+      label: monitor.current ? monitor.current.name : "GraDiOl",
+      station: 1,
+    });
 
     /* keyboard */
     const keysTex = canvasTex(512, 160, (ctx, w, h) => {
@@ -1361,6 +1598,7 @@
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2(-2, -2);
   let hoveredBook = null;
+  let hoveredHotspot = null;
   let pointerX = 0;
   let pointerY = 0;
   let hasPointer = false;
@@ -1379,8 +1617,10 @@
       tip.classList.remove("is-on");
       renderer.domElement.style.cursor = "";
       hoveredBook = null;
+      hoveredHotspot = null;
       return;
     }
+    hoveredHotspot = obj;
     const data = obj.userData.hotspot;
     tipKind.textContent = kindLabel(data.kind);
     tipLabel.textContent = data.label;
@@ -1423,7 +1663,10 @@
     }
     if (typeof data.station === "number") {
       if (station === data.station) {
-        if (data.station === 1) openSheet(DATA.deskProject || "gradi-ol");
+        if (data.station === 1) {
+          const key = monitor && monitor.current ? monitor.current.key : DATA.deskProject;
+          openSheet(key || "gradi-ol");
+        }
         if (data.station === 3) goTo(3);
         if (data.station === 4 && DATA.contactEmail) {
           window.location.href = `mailto:${DATA.contactEmail}`;
@@ -1519,8 +1762,16 @@
     }
 
     if (isPortrait()) {
-      tgt.y -= 0.45;
+      /* di stasiun meja, menjauh dan naik sedikit supaya monitor utuh
+         dan copy di bawahnya tidak menabrak layar */
+      const deskPull = clamp(
+        1 - Math.abs(smoothP - 1 / Math.max(1, lastStation)) * Math.max(1, lastStation),
+        0,
+        1
+      );
+      tgt.y -= 0.45 + deskPull * 0.18;
       pos.y -= 0.06;
+      pos.z += deskPull * 0.6;
     }
 
     camera.position.copy(pos);
@@ -1533,6 +1784,8 @@
       const want = hoveredBook === b.group ? 0.055 : 0;
       b.group.position.x = lerp(b.group.position.x, b.baseX + want, reduceMotion ? 1 : 1 - Math.exp(-dt * 9));
     });
+
+    tickMonitor(dt);
 
     /* dust drift */
     if (!reduceMotion && frames % 2 === 0) {

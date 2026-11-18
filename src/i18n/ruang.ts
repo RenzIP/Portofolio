@@ -27,7 +27,7 @@ export interface RuangCopyBlock {
   hint?: string;
   cta?: {
     label: string;
-    kind: "project" | "github";
+    kind: "project" | "projects" | "github";
   };
   links?: {
     key: "email" | "github" | "linkedin";
@@ -74,7 +74,10 @@ export interface RuangDict {
     openRepo: string;
     pending: string;
   };
-  tipKinds: Record<"contact" | "board" | "desk" | "project" | "archive", string>;
+  tipKinds: Record<
+    "contact" | "board" | "desk" | "monitor" | "project" | "archive",
+    string
+  >;
   archive: {
     label: string;
     commits: string;
@@ -88,10 +91,8 @@ export interface RuangDict {
     foot: string[];
   };
   screen: {
-    subtitle: string;
-    presence: string;
-    lock: string;
-    history: string;
+    label: string;
+    hint: string;
   };
 }
 
@@ -112,7 +113,7 @@ const id: RuangDict = {
   now: "sekarang",
   stations: [
     { label: "Ruang", cam: "ruang" },
-    { label: "Meja", cam: "meja / gradiOl" },
+    { label: "Meja", cam: "meja / monitor" },
     { label: "Rak", cam: "rak / proyek" },
     { label: "Arsip", cam: "arsip / commit" },
     { label: "Jendela", cam: "jendela / kontak" },
@@ -121,7 +122,7 @@ const id: RuangDict = {
     {
       eyebrow: "01 — Ruang",
       title: { pre: "Masuk ke ruang ", em: "kerja", post: " saya." },
-      body: "Saya Bagas, full-stack web developer di Bandung. Ruang ini bukan hiasan: meja menyimpan GraDiOl, rak menyimpan sepuluh proyek, lemari menyimpan riwayat, dan jendela menyimpan cara menghubungi saya.",
+      body: "Saya Bagas, full-stack web developer di Bandung. Ruang ini bukan hiasan: meja menyalakan monitor proyek, rak menyimpan sepuluh buku, lemari menyimpan riwayat, dan jendela menyimpan cara menghubungi saya.",
       meta: [
         "Bandung, Indonesia",
         "10 proyek · 4 branch",
@@ -130,14 +131,14 @@ const id: RuangDict = {
       hint: "Gulir untuk masuk",
     },
     {
-      eyebrow: "02 — Meja / GraDiOl",
-      title: { pre: "Diagram yang ", em: "hidup", post: " bersama." },
-      body: "GraDiOl adalah editor diagram kolaboratif real-time. Browser bicara lewat WebSocket, Go/Fiber menjaga state, Redis memegang presence, penguncian node, dan riwayat versi. Layar di meja ini memperlihatkan alurnya.",
+      eyebrow: "02 — Meja / monitor",
+      title: { pre: "Sepuluh proyek, ", em: "satu layar", post: "." },
+      body: "Layar di meja ini berganti-ganti menampilkan kesepuluh proyek. GraDiOl tetap yang paling besar — editor diagram kolaboratif real-time dengan Next.js, Go/Fiber, dan Redis. Klik monitor untuk membuka proyek yang sedang tampil.",
       meta: [
-        "Next.js · Go/Fiber · Redis · WebSocket",
-        "Commit 985df20 · Jul 2026",
+        "Monitor: 10 proyek · berganti otomatis",
+        "GraDiOl · Next.js · Go/Fiber · Redis",
       ],
-      cta: { label: "Buka detail proyek", kind: "project" },
+      cta: { label: "Lihat semua proyek", kind: "projects" },
     },
     {
       eyebrow: "03 — Rak / sepuluh proyek",
@@ -196,6 +197,7 @@ const id: RuangDict = {
     contact: "kontak",
     board: "papan",
     desk: "meja",
+    monitor: "monitor",
     project: "proyek",
     archive: "arsip",
   },
@@ -215,10 +217,8 @@ const id: RuangDict = {
     ],
   },
   screen: {
-    subtitle: "arsitektur / diagram kolaboratif",
-    presence: "presence",
-    lock: "node lock",
-    history: "version history",
+    label: "Proyek",
+    hint: "klik untuk buka",
   },
 };
 
@@ -239,7 +239,7 @@ const en: RuangDict = {
   now: "now",
   stations: [
     { label: "Room", cam: "room" },
-    { label: "Desk", cam: "desk / gradiOl" },
+    { label: "Desk", cam: "desk / monitor" },
     { label: "Shelf", cam: "shelf / projects" },
     { label: "Archive", cam: "archive / commits" },
     { label: "Window", cam: "window / contact" },
@@ -248,19 +248,19 @@ const en: RuangDict = {
     {
       eyebrow: "01 — Room",
       title: { pre: "Step into my ", em: "workspace", post: "." },
-      body: "I'm Bagas, a full-stack web developer in Bandung. This room isn't decoration: the desk holds GraDiOl, the shelf holds ten projects, the cabinet holds the history, and the window holds the way to reach me.",
+      body: "I'm Bagas, a full-stack web developer in Bandung. This room isn't decoration: the desk runs the project monitor, the shelf holds ten books, the cabinet holds the history, and the window holds the way to reach me.",
       meta: ["Bandung, Indonesia", "10 projects · 4 branches", "Open to work"],
       hint: "Scroll to step in",
     },
     {
-      eyebrow: "02 — Desk / GraDiOl",
-      title: { pre: "Diagrams that ", em: "live", post: " together." },
-      body: "GraDiOl is a real-time collaborative diagram editor. The browser talks over WebSocket, Go/Fiber owns the state, and Redis holds presence, node locks, and version history. The screen on this desk shows that flow.",
+      eyebrow: "02 — Desk / monitor",
+      title: { pre: "Ten projects, ", em: "one screen", post: "." },
+      body: "The screen on this desk cycles through all ten projects. GraDiOl is still the biggest — a real-time collaborative diagram editor with Next.js, Go/Fiber, and Redis. Click the monitor to open whichever project is showing.",
       meta: [
-        "Next.js · Go/Fiber · Redis · WebSocket",
-        "Commit 985df20 · Jul 2026",
+        "Monitor: 10 projects · auto-advancing",
+        "GraDiOl · Next.js · Go/Fiber · Redis",
       ],
-      cta: { label: "Open project detail", kind: "project" },
+      cta: { label: "See all projects", kind: "projects" },
     },
     {
       eyebrow: "03 — Shelf / ten projects",
@@ -315,6 +315,7 @@ const en: RuangDict = {
     contact: "contact",
     board: "board",
     desk: "desk",
+    monitor: "monitor",
     project: "project",
     archive: "archive",
   },
@@ -334,10 +335,8 @@ const en: RuangDict = {
     ],
   },
   screen: {
-    subtitle: "architecture / collaborative diagram",
-    presence: "presence",
-    lock: "node lock",
-    history: "version history",
+    label: "Projects",
+    hint: "click to open",
   },
 };
 
@@ -358,7 +357,7 @@ const ja: RuangDict = {
   now: "現在",
   stations: [
     { label: "部屋", cam: "部屋" },
-    { label: "机", cam: "机 / gradiOl" },
+    { label: "机", cam: "机 / モニター" },
     { label: "本棚", cam: "本棚 / プロジェクト" },
     { label: "書庫", cam: "書庫 / コミット" },
     { label: "窓", cam: "窓 / 連絡先" },
@@ -367,7 +366,7 @@ const ja: RuangDict = {
     {
       eyebrow: "01 — 部屋",
       title: { pre: "ようこそ、私の", em: "作業部屋", post: "へ。" },
-      body: "バンドン在住のフルスタック Web 開発者、バガスです。この部屋は飾りではありません。机には GraDiOl、本棚には 10 のプロジェクト、書庫には履歴、窓には連絡方法があります。",
+      body: "バンドン在住のフルスタック Web 開発者、バガスです。この部屋は飾りではありません。机にはプロジェクトのモニター、本棚には 10 冊の本、書庫には履歴、窓には連絡方法があります。",
       meta: [
         "バンドン、インドネシア",
         "10 プロジェクト · 4 ブランチ",
@@ -376,14 +375,14 @@ const ja: RuangDict = {
       hint: "スクロールして入る",
     },
     {
-      eyebrow: "02 — 机 / GraDiOl",
-      title: { pre: "共に", em: "動く", post: "ダイアグラム。" },
-      body: "GraDiOl はリアルタイム共同編集のダイアグラムエディタです。ブラウザは WebSocket で通信し、Go/Fiber が状態を保ち、Redis がプレゼンス、ノードロック、バージョン履歴を担当します。この机の画面はその流れを示しています。",
+      eyebrow: "02 — 机 / モニター",
+      title: { pre: "10件を、", em: "ひとつの画面", post: "に。" },
+      body: "この机の画面は10件のプロジェクトを順番に表示します。中でも GraDiOl が最大です。Next.js、Go/Fiber、Redis で作ったリアルタイム共同編集のダイアグラムエディタです。表示中のプロジェクトを開くには、モニターをクリックしてください。",
       meta: [
-        "Next.js · Go/Fiber · Redis · WebSocket",
-        "コミット 985df20 · 2026年7月",
+        "モニター: 10プロジェクト · 自動切り替え",
+        "GraDiOl · Next.js · Go/Fiber · Redis",
       ],
-      cta: { label: "プロジェクト詳細を開く", kind: "project" },
+      cta: { label: "すべてのプロジェクトを見る", kind: "projects" },
     },
     {
       eyebrow: "03 — 本棚 / 10 プロジェクト",
@@ -442,6 +441,7 @@ const ja: RuangDict = {
     contact: "連絡先",
     board: "ボード",
     desk: "机",
+    monitor: "モニター",
     project: "プロジェクト",
     archive: "書庫",
   },
@@ -461,10 +461,8 @@ const ja: RuangDict = {
     ],
   },
   screen: {
-    subtitle: "アーキテクチャ / 共同ダイアグラム",
-    presence: "プレゼンス",
-    lock: "ノードロック",
-    history: "バージョン履歴",
+    label: "プロジェクト",
+    hint: "クリックで開く",
   },
 };
 
@@ -485,7 +483,7 @@ const zh: RuangDict = {
   now: "至今",
   stations: [
     { label: "房间", cam: "房间" },
-    { label: "书桌", cam: "书桌 / gradiOl" },
+    { label: "书桌", cam: "书桌 / 显示器" },
     { label: "书架", cam: "书架 / 项目" },
     { label: "档案柜", cam: "档案柜 / 提交" },
     { label: "窗户", cam: "窗户 / 联系" },
@@ -494,7 +492,7 @@ const zh: RuangDict = {
     {
       eyebrow: "01 — 房间",
       title: { pre: "走进我的", em: "工作间", post: "。" },
-      body: "我是 Bagas，常驻万隆的全栈 Web 开发者。这个房间不是装饰：书桌放着 GraDiOl，书架放着十个项目，档案柜放着历史，窗户放着联系我的方式。",
+      body: "我是 Bagas，常驻万隆的全栈 Web 开发者。这个房间不是装饰：书桌亮着项目显示器，书架放着十本书，档案柜放着历史，窗户放着联系我的方式。",
       meta: [
         "万隆，印度尼西亚",
         "10 个项目 · 4 个分支",
@@ -503,14 +501,14 @@ const zh: RuangDict = {
       hint: "滚动进入",
     },
     {
-      eyebrow: "02 — 书桌 / GraDiOl",
-      title: { pre: "一起", em: "生长", post: "的图表。" },
-      body: "GraDiOl 是一个实时协作图表编辑器。浏览器通过 WebSocket 通信，Go/Fiber 维护状态，Redis 负责在线状态、节点锁定和版本历史。桌上的屏幕展示的是这条流程。",
+      eyebrow: "02 — 书桌 / 显示器",
+      title: { pre: "十个项目，", em: "一块屏幕", post: "。" },
+      body: "桌上的显示器会轮流展示十个项目。其中最大的是 GraDiOl——用 Next.js、Go/Fiber 和 Redis 构建的实时协作图表编辑器。点击显示器即可打开当前展示的项目。",
       meta: [
-        "Next.js · Go/Fiber · Redis · WebSocket",
-        "提交 985df20 · 2026年7月",
+        "显示器：十个项目 · 自动切换",
+        "GraDiOl · Next.js · Go/Fiber · Redis",
       ],
-      cta: { label: "打开项目详情", kind: "project" },
+      cta: { label: "查看所有项目", kind: "projects" },
     },
     {
       eyebrow: "03 — 书架 / 十个项目",
@@ -569,6 +567,7 @@ const zh: RuangDict = {
     contact: "联系",
     board: "白板",
     desk: "书桌",
+    monitor: "显示器",
     project: "项目",
     archive: "档案",
   },
@@ -588,10 +587,8 @@ const zh: RuangDict = {
     ],
   },
   screen: {
-    subtitle: "架构 / 协作图表",
-    presence: "在线状态",
-    lock: "节点锁定",
-    history: "版本历史",
+    label: "项目",
+    hint: "点击打开",
   },
 };
 

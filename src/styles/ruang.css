@@ -1203,7 +1203,119 @@ button {
   }
 }
 
-@media (max-height: 560px) and (min-width: 861px) {
+/* HP sangat kecil: rapatkan copy supaya monitor tetap punya ruang. */
+@media (max-width: 340px) {
+  .copy {
+    bottom: 3.4rem;
+  }
+
+  .eyebrow {
+    margin-bottom: 0.55rem;
+    font-size: 0.52rem;
+  }
+
+  .copy h1,
+  .copy h2 {
+    font-size: 1.55rem;
+    line-height: 1.06;
+  }
+
+  .copy .body {
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .copy .meta {
+    margin-top: 0.7rem;
+    padding-top: 0.5rem;
+    font-size: 0.52rem;
+  }
+
+  .copy .hint {
+    margin-top: 0.7rem;
+    font-size: 0.55rem;
+  }
+}
+
+/* HP landscape: copy pindah ke kiri, ruangan tetap terlihat di kanan. */
+@media (max-height: 520px) and (max-width: 900px) and (orientation: landscape) {
+  .topbar {
+    padding: 0.45rem 0.9rem;
+  }
+
+  .brand {
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+  }
+
+  .ghost-btn {
+    min-height: 30px;
+    padding: 0 0.55rem;
+    font-size: 0.55rem;
+  }
+
+  .langs a {
+    min-width: 24px;
+    font-size: 0.5rem;
+  }
+
+  .scrim {
+    background:
+      linear-gradient(to right, rgba(7, 6, 5, 0.94) 0%, rgba(7, 6, 5, 0.86) 32%, rgba(7, 6, 5, 0.38) 55%, transparent 72%),
+      linear-gradient(to top, rgba(7, 6, 5, 0.72) 0%, transparent 22%);
+  }
+
+  .copy {
+    left: 1rem;
+    right: auto;
+    bottom: 3rem;
+    width: min(54vw, 24rem);
+  }
+
+  .eyebrow {
+    margin-bottom: 0.55rem;
+    font-size: 0.55rem;
+  }
+
+  .copy h1,
+  .copy h2 {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    line-height: 1.05;
+  }
+
+  .copy .body {
+    max-width: none;
+    margin-top: 0.6rem;
+    font-size: clamp(0.72rem, 1.8vw, 0.8rem);
+    line-height: 1.45;
+  }
+
+  .copy .meta {
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    font-size: 0.52rem;
+    gap: 0.2rem 0.7rem;
+  }
+
+  .copy .hint {
+    margin-top: 0.6rem;
+    font-size: 0.55rem;
+  }
+
+  .mprog {
+    left: 1rem;
+    right: 1rem;
+    bottom: 0.65rem;
+  }
+
+  .mprog .labels {
+    margin-bottom: 0.3rem;
+    font-size: 0.5rem;
+  }
+}
+
+@media (max-height: 560px) and (min-width: 901px) {
   .copy {
     bottom: 2rem;
   }
