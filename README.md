@@ -33,10 +33,12 @@ Dibangun dengan **Astro 7** + **Tailwind CSS v4**, output HTML statis.
   lima stasiun. Objeknya bukan hiasan: klik buku untuk membuka lembar proyek,
   klik papan untuk lompat ke arsip commit, klik jendela untuk membuka email.
 - **Monitor proyek** — layar di meja berganti-ganti menampilkan kesepuluh
-  proyek (nama, stack, tanggal, hash) tiap ~6,6 detik. Klik monitor untuk
-  membuka proyek yang sedang tampil; kalau kamera masih di stasiun lain, klik
-  pertama membawa ke meja dulu. Siklus berhenti saat `prefers-reduced-motion`,
-  tab tidak aktif, atau sheet/daftar terbuka.
+  proyek (nama, stack, tanggal, hash) tiap ~6,6 detik. Di bawah layar ada
+  panah dan satu segmen per proyek: klik segmen untuk lompat, klik badan
+  layar untuk membuka proyek yang sedang tampil. Membuka proyek dari rak
+  juga menyinkronkan monitor ke proyek itu. Kalau kamera masih di stasiun
+  lain, klik pertama membawa ke meja dulu. Siklus berhenti saat
+  `prefers-reduced-motion`, tab tidak aktif, atau sheet/daftar terbuka.
 - **Daftar proyek tanpa kanvas** — tekan `L` atau tombol daftar untuk membaca
   semuanya sebagai daftar biasa; `Esc` menutup. Fokus keyboard terkunci di
   dalam panel selama panel terbuka.

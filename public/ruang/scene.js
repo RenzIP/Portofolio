@@ -498,6 +498,12 @@
   const MONITOR_H = 576;
   const MONITOR_INTERVAL = 6.6;
   const MONITOR_WIPE = 0.72;
+  const MONITOR_BAR_Y = MONITOR_H - 24;
+  const MONITOR_BAR_LEFT = 72;
+  const MONITOR_BAR_RIGHT = MONITOR_W - 72;
+  const MONITOR_BAR_H = 5;
+  const MONITOR_BAR_GAP = 5;
+  const MONITOR_HIT_BAND = 42;
   const MONITOR_FALLBACK = {
     key: "ruang",
     n: "00",
@@ -509,6 +515,14 @@
   };
 
   let monitor = null;
+  let monitorHover = null;
+  let monitorHoverKey = "";
+
+  function monitorSegments() {
+    const n = Math.max(1, PROJECTS.length);
+    const span = MONITOR_BAR_RIGHT - MONITOR_BAR_LEFT;
+    return { n, width: (span - MONITOR_BAR_GAP * (n - 1)) / n };
+  }
 
   function monitorFont(size, weight, mono) {
     const family = mono
@@ -692,22 +706,73 @@
     ctx.fillText(hint, w - 48, h - 48);
     ctx.textAlign = "left";
 
-    /* titik progres */
+    /* kontrol: panah + satu segmen per proyek */
+    const seg = monitorSegments();
+    const arrow = (cx, dir) => {
+      ctx.fillStyle = "rgba(143, 211, 178, 0.4)";
+      ctx.beginPath();
+      ctx.moveTo(cx + dir * 4, MONITOR_BAR_Y);
+      ctx.lineTo(cx - dir * 4, MONITOR_BAR_Y - 6);
+      ctx.lineTo(cx - dir * 4, MONITOR_BAR_Y + 6);
+      ctx.closePath();
+      ctx.fill();
+    };
+    arrow(46, -1);
+    arrow(w - 46, 1);
+
     for (let i = 0; i < PROJECTS.length; i++) {
-      const on = i === index;
-      const dotX = 51 + i * 18;
-      const dotY = h - 21;
-      if (on) {
-        ctx.fillStyle = accent;
-        roundRect(ctx, dotX - 3, dotY - 2.5, 16, 5, 2.5);
-        ctx.fill();
-      } else {
-        ctx.fillStyle = "rgba(143, 211, 178, 0.24)";
-        ctx.beginPath();
-        ctx.arc(dotX, dotY, 2.6, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      const x = MONITOR_BAR_LEFT + i * (seg.width + MONITOR_BAR_GAP);
+      ctx.fillStyle = i === index ? accent : "rgba(143, 211, 178, 0.22)";
+      roundRect(
+        ctx,
+        x,
+        MONITOR_BAR_Y - MONITOR_BAR_H / 2,
+        seg.width,
+        MONITOR_BAR_H,
+        MONITOR_BAR_H / 2
+      );
+      ctx.fill();
     }
+  }
+
+  function monitorBarTarget(px, py) {
+    if (py < MONITOR_H - MONITOR_HIT_BAND) return null;
+    if (px < 64) return { type: "prev" };
+    if (px > MONITOR_W - 64) return { type: "next" };
+    const seg = monitorSegments();
+    const rel = px - MONITOR_BAR_LEFT;
+    if (rel < 0) return null;
+    const index = Math.min(seg.n - 1, Math.floor(rel / (seg.width + MONITOR_BAR_GAP)));
+    return { type: "index", index };
+  }
+
+  function drawMonitorHover(ctx) {
+    if (!monitorHover) return;
+    if (monitorHover.type === "index") {
+      const seg = monitorSegments();
+      const x = MONITOR_BAR_LEFT + monitorHover.index * (seg.width + MONITOR_BAR_GAP);
+      ctx.fillStyle = "rgba(223, 243, 232, 0.42)";
+      roundRect(
+        ctx,
+        x,
+        MONITOR_BAR_Y - MONITOR_BAR_H / 2,
+        seg.width,
+        MONITOR_BAR_H,
+        MONITOR_BAR_H / 2
+      );
+      ctx.fill();
+      return;
+    }
+    const prev = monitorHover.type === "prev";
+    const cx = prev ? 46 : MONITOR_W - 46;
+    const dir = prev ? -1 : 1;
+    ctx.fillStyle = "rgba(223, 243, 232, 0.85)";
+    ctx.beginPath();
+    ctx.moveTo(cx + dir * 4, MONITOR_BAR_Y);
+    ctx.lineTo(cx - dir * 4, MONITOR_BAR_Y - 6);
+    ctx.lineTo(cx - dir * 4, MONITOR_BAR_Y + 6);
+    ctx.closePath();
+    ctx.fill();
   }
 
   function makeMonitor() {
@@ -751,23 +816,50 @@
     };
   }
 
-  function advanceMonitor() {
-    if (!monitor || PROJECTS.length < 2) return;
-    const nextIndex = (monitor.index + 1) % PROJECTS.length;
-    const nextSlot = 1 - monitor.front;
-    drawMonitorSlide(monitor.ctxs[nextSlot], PROJECTS[nextIndex], nextIndex);
-    monitor.from = monitor.front;
-    monitor.to = nextSlot;
-    monitor.t = 0;
-    monitor.index = nextIndex;
-    monitor.current = PROJECTS[nextIndex];
+  function setMonitorIndex(index, instant) {
+    if (!monitor || !PROJECTS.length) return;
+    const n = PROJECTS.length;
+    const target = ((index % n) + n) % n;
+
+    /* kalau sedang di tengah wipe, selesaikan dulu supaya tidak salah buffer */
+    if (monitor.t < 1) {
+      monitor.t = 1;
+      monitor.front = monitor.to;
+      compositeMonitor(1);
+    }
+
     monitor.acc = 0;
+    if (target === monitor.index) return;
+
+    monitor.index = target;
+    monitor.current = PROJECTS[target];
+
+    if (instant || reduceMotion) {
+      drawMonitorSlide(monitor.ctxs[0], monitor.current, target);
+      monitor.front = 0;
+      monitor.from = 0;
+      monitor.to = 0;
+      monitor.t = 1;
+      compositeMonitor(1);
+    } else {
+      const nextSlot = 1 - monitor.front;
+      drawMonitorSlide(monitor.ctxs[nextSlot], monitor.current, target);
+      monitor.from = monitor.front;
+      monitor.to = nextSlot;
+      monitor.t = 0;
+    }
+
     if (monitor.screen && monitor.screen.userData.hotspot) {
       monitor.screen.userData.hotspot.label = monitor.current.name;
     }
     if (hoveredHotspot === monitor.screen) {
       tipLabel.textContent = monitor.current.name;
     }
+  }
+
+  function advanceMonitor() {
+    if (!monitor || PROJECTS.length < 2) return;
+    setMonitorIndex(monitor.index + 1, false);
   }
 
   function compositeMonitor(t) {
@@ -777,7 +869,9 @@
     const { ctxOut, canvases, from, to } = monitor;
     ctxOut.clearRect(0, 0, MONITOR_W, MONITOR_H);
     ctxOut.drawImage(canvases[from], 0, 0);
-    if (edge > 0) {
+    if (edge >= MONITOR_W) {
+      ctxOut.drawImage(canvases[to], 0, 0);
+    } else if (edge > 0) {
       ctxOut.save();
       ctxOut.beginPath();
       ctxOut.rect(0, 0, edge, MONITOR_H);
@@ -787,6 +881,7 @@
       ctxOut.fillStyle = tint(monitor.current.color, 0.8);
       ctxOut.fillRect(Math.max(0, edge - 2), 0, 3, MONITOR_H);
     }
+    drawMonitorHover(ctxOut);
     monitor.texture.needsUpdate = true;
   }
 
@@ -1481,6 +1576,9 @@
   function openSheet(key) {
     const p = PROJECTS.find((x) => x.key === key);
     if (!p) return;
+    /* ruangan ikut sinkron: proyek yang dibuka tampil di monitor meja */
+    const monitorIndex = PROJECTS.indexOf(p);
+    if (monitorIndex >= 0) setMonitorIndex(monitorIndex, true);
     lastFocus = document.activeElement;
     tip.classList.remove("is-on");
     if (renderer && renderer.domElement) renderer.domElement.style.cursor = "";
@@ -1603,13 +1701,45 @@
   let pointerY = 0;
   let hasPointer = false;
 
-  function pick(clientX, clientY) {
+  function pickHit(clientX, clientY) {
     const r = renderer.domElement.getBoundingClientRect();
     pointer.x = ((clientX - r.left) / r.width) * 2 - 1;
     pointer.y = -((clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
     const hits = raycaster.intersectObjects(hotspots, false);
-    return hits.length ? hits[0].object : null;
+    return hits.length ? hits[0] : null;
+  }
+
+  function monitorPoint(hit) {
+    if (!hit || !monitor || hit.object !== monitor.screen || !hit.uv) return null;
+    return { x: hit.uv.x * MONITOR_W, y: (1 - hit.uv.y) * MONITOR_H };
+  }
+
+  function updateMonitorHover(hit) {
+    const point = monitorPoint(hit);
+    const target = point ? monitorBarTarget(point.x, point.y) : null;
+    const key = target ? `${target.type}:${target.index ?? ""}` : "";
+    if (key !== monitorHoverKey) {
+      monitorHoverKey = key;
+      monitorHover = target;
+      if (monitor) compositeMonitor(monitor.t);
+    }
+    if (!monitor || !monitor.screen) return;
+    if (target) {
+      const offset = target.type === "next" ? 1 : target.type === "prev" ? -1 : 0;
+      const idx =
+        target.type === "index"
+          ? target.index
+          : (monitor.index + offset + PROJECTS.length) % PROJECTS.length;
+      const p = PROJECTS[idx];
+      if (!p) return;
+      tipKind.textContent = kindLabel("monitor");
+      tipLabel.textContent = p.name;
+      tip.classList.add("is-on");
+      renderer.domElement.style.cursor = "pointer";
+    } else if (hit && hit.object === monitor.screen) {
+      tipLabel.textContent = monitor.current ? monitor.current.name : "";
+    }
   }
 
   function setHover(obj) {
@@ -1639,7 +1769,9 @@
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
     if (listOpen || sheetOpen) return;
-    setHover(pick(e.clientX, e.clientY));
+    const hit = pickHit(e.clientX, e.clientY);
+    setHover(hit ? hit.object : null);
+    updateMonitorHover(hit);
     const pad = 14;
     const w = tip.offsetWidth;
     const x = e.clientX + pad + w > window.innerWidth ? e.clientX - w - pad : e.clientX + pad;
@@ -1650,12 +1782,32 @@
     tip.classList.remove("is-on");
     renderer.domElement.style.cursor = "";
     hoveredBook = null;
+    hoveredHotspot = null;
+    if (monitorHover) {
+      monitorHover = null;
+      monitorHoverKey = "";
+      if (monitor) compositeMonitor(monitor.t);
+    }
   });
 
   renderer.domElement.addEventListener("click", (e) => {
     if (listOpen || sheetOpen) return;
-    const obj = pick(e.clientX, e.clientY);
-    if (!obj) return;
+    const hit = pickHit(e.clientX, e.clientY);
+    if (!hit) return;
+    const obj = hit.object;
+
+    /* segmen/panah di layar monitor: pindah proyek, bukan buka sheet */
+    const point = monitorPoint(hit);
+    if (point && monitor) {
+      const target = monitorBarTarget(point.x, point.y);
+      if (target) {
+        if (target.type === "prev") setMonitorIndex(monitor.index - 1, false);
+        else if (target.type === "next") setMonitorIndex(monitor.index + 1, false);
+        else setMonitorIndex(target.index, false);
+        return;
+      }
+    }
+
     const data = obj.userData.hotspot;
     if (data.sheet) {
       openSheet(data.sheet);
